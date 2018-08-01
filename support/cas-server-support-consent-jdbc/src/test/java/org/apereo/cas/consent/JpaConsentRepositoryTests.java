@@ -1,6 +1,5 @@
 package org.apereo.cas.consent;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.CipherExecutor;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.principal.Service;
@@ -8,6 +7,8 @@ import org.apereo.cas.config.CasConsentJdbcConfiguration;
 import org.apereo.cas.services.AbstractRegisteredService;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,39 +29,39 @@ import static org.junit.Assert.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {CasConsentJdbcConfiguration.class, RefreshAutoConfiguration.class})
-@Slf4j
 public class JpaConsentRepositoryTests {
 
     private static final DefaultConsentDecisionBuilder BUILDER = new DefaultConsentDecisionBuilder(CipherExecutor.noOpOfSerializableToString());
     private static final Service SVC = RegisteredServiceTestUtils.getService();
     private static final AbstractRegisteredService REG_SVC = RegisteredServiceTestUtils.getRegisteredService(SVC.getId());
+
     private static final Map<String, Object> ATTR = CollectionUtils.wrap("attribute", "value");
-    
+
     @Autowired
     @Qualifier("consentRepository")
     private ConsentRepository repository;
-    
+
     @Test
     public void verifyConsentDecisionIsNotFound() {
-        final ConsentDecision d = this.repository.findConsentDecision(SVC, REG_SVC, CoreAuthenticationTestUtils.getAuthentication());
+        val d = this.repository.findConsentDecision(SVC, REG_SVC, CoreAuthenticationTestUtils.getAuthentication());
         assertNull(d);
     }
 
     @Test
     public void verifyConsentDecisionIsSaved() {
-        final ConsentDecision decision = BUILDER.build(SVC, REG_SVC, "casuser", ATTR);
+        val decision = BUILDER.build(SVC, REG_SVC, "casuser", ATTR);
         decision.setId(100);
         repository.storeConsentDecision(decision);
 
-        ConsentDecision d = this.repository.findConsentDecision(SVC, REG_SVC, CoreAuthenticationTestUtils.getAuthentication("casuser"));
+        var d = this.repository.findConsentDecision(SVC, REG_SVC, CoreAuthenticationTestUtils.getAuthentication("casuser"));
         assertNotNull(d);
         assertEquals("casuser", d.getPrincipal());
-        
-        final boolean res = this.repository.deleteConsentDecision(d.getId(), d.getPrincipal());
+
+        val res = this.repository.deleteConsentDecision(d.getId(), d.getPrincipal());
         assertTrue(res);
         assertTrue(this.repository.findConsentDecisions().isEmpty());
         d = this.repository.findConsentDecision(SVC, REG_SVC, CoreAuthenticationTestUtils.getAuthentication("casuser"));
         assertNull(d);
     }
-    
+
 }

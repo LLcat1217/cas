@@ -1,6 +1,5 @@
 package org.apereo.cas.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.CipherExecutor;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionStrategy;
@@ -27,6 +26,9 @@ import org.apereo.cas.ws.idp.services.WSFederationRelyingPartyTokenProducer;
 import org.apereo.cas.ws.idp.services.WSFederationServiceRegistry;
 import org.apereo.cas.ws.idp.web.WSFederationValidateRequestCallbackController;
 import org.apereo.cas.ws.idp.web.WSFederationValidateRequestController;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.jasig.cas.client.validation.AbstractUrlBasedTicketValidator;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,10 +146,10 @@ public class CoreWsSecurityIdentityProviderConfiguration implements Authenticati
 
     @Override
     public void configureServiceRegistry(final ServiceRegistryExecutionPlan plan) {
-        final Service callbackService = wsFederationCallbackService();
+        val callbackService = wsFederationCallbackService();
         LOGGER.debug("Initializing callback service [{}]", callbackService);
 
-        final RegexRegisteredService service = new RegexRegisteredService();
+        val service = new RegexRegisteredService();
         service.setId(Math.abs(RandomUtils.getNativeInstance().nextLong()));
         service.setEvaluationOrder(0);
         service.setName(service.getClass().getSimpleName());

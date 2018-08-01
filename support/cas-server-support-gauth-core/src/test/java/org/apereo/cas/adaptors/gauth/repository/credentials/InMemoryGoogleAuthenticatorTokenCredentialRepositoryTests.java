@@ -1,12 +1,12 @@
 package org.apereo.cas.adaptors.gauth.repository.credentials;
 
+import org.apereo.cas.CipherExecutor;
+import org.apereo.cas.config.CasCoreUtilConfiguration;
+
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
 import com.warrenstrange.googleauth.IGoogleAuthenticator;
-import lombok.extern.slf4j.Slf4j;
-import org.apereo.cas.CipherExecutor;
-import org.apereo.cas.config.CasCoreUtilConfiguration;
-import org.apereo.cas.authentication.OneTimeTokenAccount;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,29 +28,28 @@ import static org.junit.Assert.*;
     AopAutoConfiguration.class,
     CasCoreUtilConfiguration.class
 })
-@Slf4j
 public class InMemoryGoogleAuthenticatorTokenCredentialRepositoryTests {
     private IGoogleAuthenticator google;
 
     @Before
-    public void setup() {
-        final GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
+    public void initialize() {
+        val bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
         this.google = new GoogleAuthenticator(bldr.build());
     }
 
     @Test
     public void verifyCreate() {
-        final InMemoryGoogleAuthenticatorTokenCredentialRepository repo =
+        val repo =
             new InMemoryGoogleAuthenticatorTokenCredentialRepository(CipherExecutor.noOpOfStringToString(), google);
-        final OneTimeTokenAccount acct = repo.create("casuser");
+        val acct = repo.create("casuser");
         assertNotNull(acct);
     }
 
     @Test
     public void verifyGet() {
-        final InMemoryGoogleAuthenticatorTokenCredentialRepository repo =
+        val repo =
             new InMemoryGoogleAuthenticatorTokenCredentialRepository(CipherExecutor.noOpOfStringToString(), google);
-        OneTimeTokenAccount acct = repo.get("casuser");
+        var acct = repo.get("casuser");
         assertNull(acct);
         acct = repo.create("casuser");
         repo.save(acct.getUsername(), acct.getSecretKey(), acct.getValidationCode(), acct.getScratchCodes());

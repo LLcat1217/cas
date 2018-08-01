@@ -1,9 +1,9 @@
 package org.apereo.cas;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.CasPersonDirectoryConfiguration;
+
+import lombok.val;
 import org.apereo.services.persondir.IPersonAttributeDao;
-import org.apereo.services.persondir.IPersonAttributes;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,6 @@ import static org.junit.Assert.*;
     CasPersonDirectoryConfiguration.class,
     RefreshAutoConfiguration.class})
 @TestPropertySource(locations = {"classpath:/persondirectory.properties"})
-@Slf4j
 public class CachingAttributeRepositoryTests {
 
     @Autowired
@@ -35,12 +34,12 @@ public class CachingAttributeRepositoryTests {
 
     @Test
     public void verifyRepositoryCaching() {
-        final IPersonAttributes person1 = cachingAttributeRepository.getPerson("casuser");
+        val person1 = cachingAttributeRepository.getPerson("casuser");
         assertEquals("casuser", person1.getName());
         assertEquals(4, person1.getAttributes().size());
 
         // The second call should not go out to the repositories again
-        final IPersonAttributes person2 = cachingAttributeRepository.getPerson("casuser");
+        val person2 = cachingAttributeRepository.getPerson("casuser");
         assertEquals(4, person2.getAttributes().size());
     }
 }

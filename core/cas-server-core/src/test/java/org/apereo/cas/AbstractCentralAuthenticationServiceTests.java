@@ -1,7 +1,5 @@
 package org.apereo.cas;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.AuthenticationManager;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.principal.WebApplicationServiceFactory;
@@ -35,7 +33,11 @@ import org.apereo.cas.validation.config.CasCoreValidationConfiguration;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.support.ArgumentExtractor;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
@@ -47,14 +49,12 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import javax.annotation.PostConstruct;
-import lombok.Setter;
 
 /**
  * @author Scott Battaglia
  * @since 3.0.0
  */
-@SpringBootTest(classes = { AbstractCentralAuthenticationServiceTests.CasTestConfiguration.class,
+@SpringBootTest(classes = {AbstractCentralAuthenticationServiceTests.CasTestConfiguration.class,
     CasAuthenticationEventExecutionPlanTestConfiguration.class,
     CasCoreServicesConfiguration.class,
     CasWebApplicationServiceFactoryConfiguration.class,
@@ -83,12 +83,11 @@ import lombok.Setter;
     AopAutoConfiguration.class,
     CasPersonDirectoryTestConfiguration.class,
     CasCoreWebflowConfiguration.class,
-    CasCoreValidationConfiguration.class })
+    CasCoreValidationConfiguration.class})
 @RunWith(SpringRunner.class)
 @EnableAspectJAutoProxy
 @DirtiesContext
-@TestPropertySource(locations = { "classpath:/core.properties" })
-@Slf4j
+@TestPropertySource(locations = {"classpath:/core.properties"})
 @Setter
 @Getter
 public abstract class AbstractCentralAuthenticationServiceTests {
@@ -119,13 +118,13 @@ public abstract class AbstractCentralAuthenticationServiceTests {
     private AuthenticationSystemSupport authenticationSystemSupport;
 
     @TestConfiguration
-    public static class CasTestConfiguration {
+    public static class CasTestConfiguration implements InitializingBean {
 
         @Autowired
         protected ApplicationContext applicationContext;
 
-        @PostConstruct
-        public void init() {
+        @Override
+        public void afterPropertiesSet() {
             SchedulingUtils.prepScheduledAnnotationBeanPostProcessor(applicationContext);
         }
     }

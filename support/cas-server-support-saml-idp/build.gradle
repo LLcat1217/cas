@@ -9,6 +9,7 @@ dependencies {
     implementation project(":core:cas-server-core-logout-api")
     implementation project(":core:cas-server-core-web-api")
     implementation project(":core:cas-server-core-services-registry")
+    implementation project(":core:cas-server-core-services-registry")
     implementation project(":core:cas-server-core-authentication-api")
     implementation project(":core:cas-server-core-webflow")
     implementation project(":core:cas-server-core-webflow-api")
@@ -29,7 +30,7 @@ dependencies {
     implementation libraries.shibidp
     implementation libraries.pac4j
     implementation libraries.caffein
-    implementation libraries.groovy
+
     
     testImplementation project(path: ":core:cas-server-core-authentication", configuration: "tests")
     testImplementation project(path: ":core:cas-server-core-services", configuration: "tests")
@@ -37,7 +38,6 @@ dependencies {
     testImplementation project(path: ":core:cas-server-core-util-api", configuration: "tests")
 
     testImplementation project(":support:cas-server-support-json-service-registry")
-
     testImplementation project(":support:cas-server-support-jpa-service-registry")
     testImplementation project(":support:cas-server-support-jdbc-drivers")
 

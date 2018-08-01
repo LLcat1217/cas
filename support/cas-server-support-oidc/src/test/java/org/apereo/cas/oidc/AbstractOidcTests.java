@@ -1,7 +1,5 @@
 package org.apereo.cas.oidc;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apereo.cas.category.FileSystemCategory;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
@@ -40,6 +38,10 @@ import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
 import org.apereo.cas.web.support.config.CasThrottlingConfiguration;
+
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import lombok.val;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.RsaJsonWebKey;
@@ -54,12 +56,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.webflow.execution.Action;
 
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * This is {@link AbstractOidcTests}.
@@ -99,9 +101,12 @@ import lombok.extern.slf4j.Slf4j;
     CasOAuthAuthenticationServiceSelectionStrategyConfiguration.class,
     OidcConfiguration.class,
     CasCoreAuthenticationServiceSelectionStrategyConfiguration.class})
-@Slf4j
 @DirtiesContext
 @Category(FileSystemCategory.class)
+@TestPropertySource(properties = {
+    "cas.authn.oidc.issuer=https://sso.example.org/cas/oidc",
+    "cas.authn.oidc.jwksFile=classpath:keystore.jwks"
+})
 public abstract class AbstractOidcTests {
 
     @ClassRule
@@ -147,12 +152,12 @@ public abstract class AbstractOidcTests {
     protected OidcIdTokenGeneratorService oidcIdTokenGenerator;
 
     @Before
-    public void setup() {
+    public void initialize() {
         servicesManager.save(getOidcRegisteredService());
     }
 
     protected OidcRegisteredService getOidcRegisteredService() {
-        final OidcRegisteredService svc = new OidcRegisteredService();
+        val svc = new OidcRegisteredService();
         svc.setClientId("clientid");
         svc.setName("oauth");
         svc.setDescription("description");
@@ -169,12 +174,12 @@ public abstract class AbstractOidcTests {
     }
 
     protected JwtClaims getClaims() {
-        final JwtClaims claims = new JwtClaims();
+        val claims = new JwtClaims();
         claims.setJwtId(RandomStringUtils.randomAlphanumeric(16));
         claims.setIssuer("https://cas.example.org");
         claims.setAudience(getOidcRegisteredService().getClientId());
 
-        final NumericDate expirationDate = NumericDate.now();
+        val expirationDate = NumericDate.now();
         expirationDate.addSeconds(120);
         claims.setExpirationTime(expirationDate);
         claims.setIssuedAtToNow();

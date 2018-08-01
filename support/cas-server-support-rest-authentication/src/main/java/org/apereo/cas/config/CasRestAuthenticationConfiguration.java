@@ -1,8 +1,5 @@
 package org.apereo.cas.config;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.adaptors.rest.RestAuthenticationApi;
 import org.apereo.cas.adaptors.rest.RestAuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
@@ -12,8 +9,11 @@ import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.authentication.principal.PrincipalResolver;
 import org.apereo.cas.authentication.support.password.PasswordEncoderUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.rest.RestAuthenticationProperties;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -32,7 +32,6 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration("casRestAuthenticationConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class CasRestAuthenticationConfiguration {
 
     @Autowired
@@ -69,8 +68,8 @@ public class CasRestAuthenticationConfiguration {
 
     @Bean
     public AuthenticationHandler restAuthenticationHandler() {
-        final RestAuthenticationProperties rest = casProperties.getAuthn().getRest();
-        final RestAuthenticationHandler r = new RestAuthenticationHandler(rest.getName(), restAuthenticationApi(),
+        val rest = casProperties.getAuthn().getRest();
+        val r = new RestAuthenticationHandler(rest.getName(), restAuthenticationApi(),
             servicesManager, restAuthenticationPrincipalFactory());
         r.setPasswordEncoder(PasswordEncoderUtils.newPasswordEncoder(rest.getPasswordEncoder()));
         return r;

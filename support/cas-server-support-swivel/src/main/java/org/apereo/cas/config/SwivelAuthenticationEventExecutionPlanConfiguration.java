@@ -1,9 +1,8 @@
 package org.apereo.cas.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.adaptors.swivel.SwivelAuthenticationHandler;
-import org.apereo.cas.adaptors.swivel.SwivelTokenCredential;
 import org.apereo.cas.adaptors.swivel.SwivelMultifactorAuthenticationProvider;
+import org.apereo.cas.adaptors.swivel.SwivelTokenCredential;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationMetaDataPopulator;
 import org.apereo.cas.authentication.ByCredentialTypeAuthenticationHandlerResolver;
@@ -13,9 +12,10 @@ import org.apereo.cas.authentication.metadata.AuthenticationContextAttributeMeta
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.mfa.SwivelMultifactorProperties;
 import org.apereo.cas.services.MultifactorAuthenticationProvider;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration("swivelAuthenticationEventExecutionPlanConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class SwivelAuthenticationEventExecutionPlanConfiguration {
     @Autowired
     private CasConfigurationProperties casProperties;
@@ -45,9 +44,9 @@ public class SwivelAuthenticationEventExecutionPlanConfiguration {
     @Bean
     @RefreshScope
     public AuthenticationMetaDataPopulator swivelAuthenticationMetaDataPopulator() {
-        final String authenticationContextAttribute = casProperties.getAuthn().getMfa().getAuthenticationContextAttribute();
+        val authenticationContextAttribute = casProperties.getAuthn().getMfa().getAuthenticationContextAttribute();
         return new AuthenticationContextAttributeMetaDataPopulator(authenticationContextAttribute,
-                swivelAuthenticationHandler(), swivelAuthenticationProvider());
+            swivelAuthenticationHandler(), swivelAuthenticationProvider());
     }
 
     @Bean
@@ -65,16 +64,16 @@ public class SwivelAuthenticationEventExecutionPlanConfiguration {
     @Bean
     @RefreshScope
     public SwivelAuthenticationHandler swivelAuthenticationHandler() {
-        final SwivelMultifactorProperties swivel = this.casProperties.getAuthn().getMfa().getSwivel();
+        val swivel = this.casProperties.getAuthn().getMfa().getSwivel();
         return new SwivelAuthenticationHandler(swivel.getName(),
-                servicesManager, swivelPrincipalFactory(), swivel);
+            servicesManager, swivelPrincipalFactory(), swivel);
     }
 
     @Bean
     @RefreshScope
     public MultifactorAuthenticationProvider swivelAuthenticationProvider() {
-        final SwivelMultifactorProperties swivel = this.casProperties.getAuthn().getMfa().getSwivel();
-        final SwivelMultifactorAuthenticationProvider p = new SwivelMultifactorAuthenticationProvider(swivel.getSwivelUrl());
+        val swivel = this.casProperties.getAuthn().getMfa().getSwivel();
+        val p = new SwivelMultifactorAuthenticationProvider(swivel.getSwivelUrl());
         p.setBypassEvaluator(swivelBypassEvaluator());
         p.setGlobalFailureMode(casProperties.getAuthn().getMfa().getGlobalFailureMode());
         p.setOrder(swivel.getRank());

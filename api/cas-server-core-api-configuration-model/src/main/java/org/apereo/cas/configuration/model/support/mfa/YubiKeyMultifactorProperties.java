@@ -1,13 +1,14 @@
 package org.apereo.cas.configuration.model.support.mfa;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.configuration.model.core.util.EncryptionJwtSigningJwtCryptographyProperties;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.configuration.model.support.mongo.SingleCollectionMongoDbProperties;
 import org.apereo.cas.configuration.support.RequiredProperty;
 import org.apereo.cas.configuration.support.RequiresModule;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 
 import java.util.ArrayList;
@@ -21,7 +22,6 @@ import java.util.Map;
  * @since 5.2.0
  */
 @RequiresModule(name = "cas-server-support-yubikey")
-
 @Getter
 @Setter
 public class YubiKeyMultifactorProperties extends BaseMultifactorProviderProperties {
@@ -40,7 +40,7 @@ public class YubiKeyMultifactorProperties extends BaseMultifactorProviderPropert
     private Integer clientId = 0;
 
     /**
-     *  Yubikey secret key.
+     * Yubikey secret key.
      */
     @RequiredProperty
     private String secretKey = StringUtils.EMPTY;

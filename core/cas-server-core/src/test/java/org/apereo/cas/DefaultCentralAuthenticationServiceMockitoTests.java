@@ -1,6 +1,5 @@
 package org.apereo.cas;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.AuditableExecution;
 import org.apereo.cas.audit.AuditableExecutionResult;
 import org.apereo.cas.authentication.Authentication;
@@ -48,7 +47,6 @@ import org.apereo.cas.services.UnauthorizedServiceException;
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.InvalidTicketException;
 import org.apereo.cas.ticket.ServiceTicket;
-import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketFactory;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TransientSessionTicket;
@@ -62,7 +60,8 @@ import org.apereo.cas.ticket.proxy.ProxyGrantingTicket;
 import org.apereo.cas.ticket.proxy.ProxyTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.support.NeverExpiresExpirationPolicy;
-import org.apereo.cas.validation.Assertion;
+
+import lombok.val;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -79,10 +78,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -114,7 +111,6 @@ import static org.mockito.Mockito.*;
     CasDefaultServiceTicketIdGeneratorsConfiguration.class,
     CasCoreAuthenticationPrincipalConfiguration.class
 })
-@Slf4j
 public class DefaultCentralAuthenticationServiceMockitoTests {
 
     private static final String TGT_ID = "tgt-id";
@@ -135,17 +131,51 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
     private Authentication authentication;
     private TicketRegistry ticketRegMock;
 
-    private static class VerifyServiceByIdMatcher implements ArgumentMatcher<Service> {
-        private final String id;
+    private static ServicesManager getServicesManager(final Service service1, final Service service2) {
+        val mockRegSvc1 = createMockRegisteredService(service1.getId(), true, getServiceProxyPolicy(false));
+        val mockRegSvc2 = createMockRegisteredService("test", false, getServiceProxyPolicy(true));
+        val mockRegSvc3 = createMockRegisteredService(service2.getId(), true, getServiceProxyPolicy(true));
 
-        VerifyServiceByIdMatcher(final String id) {
-            this.id = id;
+        val smMock = mock(ServicesManager.class);
+        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher(service1.getId())))).thenReturn(mockRegSvc1);
+        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher("test")))).thenReturn(mockRegSvc2);
+        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher(service2.getId())))).thenReturn(mockRegSvc3);
+        return smMock;
+    }
+
+    private static ServiceTicket createMockServiceTicket(final String id, final Service svc) {
+        val stMock = mock(ServiceTicket.class);
+        when(stMock.getService()).thenReturn(svc);
+        when(stMock.getId()).thenReturn(id);
+        when(stMock.isValidFor(svc)).thenReturn(true);
+        return stMock;
+    }
+
+    private static RegisteredServiceProxyPolicy getServiceProxyPolicy(final boolean canProxy) {
+        if (!canProxy) {
+            return new RefuseRegisteredServiceProxyPolicy();
         }
 
-        @Override
-        public boolean matches(final Service s) {
-            return s != null && s.getId().equals(this.id);
-        }
+        return new RegexMatchingRegisteredServiceProxyPolicy(".*");
+    }
+
+    private static RegisteredService createMockRegisteredService(final String svcId,
+                                                                 final boolean enabled, final RegisteredServiceProxyPolicy proxy) {
+        val mockRegSvc = mock(RegisteredService.class);
+        when(mockRegSvc.getServiceId()).thenReturn(svcId);
+        when(mockRegSvc.getProxyPolicy()).thenReturn(proxy);
+        when(mockRegSvc.getName()).thenReturn(svcId);
+        when(mockRegSvc.matches(argThat(new VerifyServiceByIdMatcher(svcId)))).thenReturn(true);
+        when(mockRegSvc.getAttributeReleasePolicy()).thenReturn(new ReturnAllAttributeReleasePolicy());
+        when(mockRegSvc.getUsernameAttributeProvider()).thenReturn(new DefaultRegisteredServiceUsernameProvider());
+        when(mockRegSvc.getAccessStrategy()).thenReturn(new DefaultRegisteredServiceAccessStrategy(enabled, true));
+        return mockRegSvc;
+    }
+
+    private static Service getService(final String name) {
+        val request = new MockHttpServletRequest();
+        request.addParameter(CasProtocolConstants.PARAMETER_SERVICE, name);
+        return new WebApplicationServiceFactory().createService(request);
     }
 
     @Before
@@ -154,22 +184,22 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
         when(this.authentication.getAuthenticationDate()).thenReturn(ZonedDateTime.now(ZoneOffset.UTC));
         final CredentialMetaData metadata = new BasicCredentialMetaData(
             RegisteredServiceTestUtils.getCredentialsWithSameUsernameAndPassword("principal"));
-        final Map<String, AuthenticationHandlerExecutionResult> successes = new HashMap<>();
+        val successes = new HashMap<String, AuthenticationHandlerExecutionResult>();
         successes.put("handler1", new DefaultAuthenticationHandlerExecutionResult(mock(AuthenticationHandler.class), metadata));
         when(this.authentication.getCredentials()).thenReturn(Arrays.asList(metadata));
         when(this.authentication.getSuccesses()).thenReturn(successes);
         when(this.authentication.getPrincipal()).thenReturn(new DefaultPrincipalFactory().createPrincipal(PRINCIPAL));
 
-        final Service service1 = getService(SVC1_ID);
-        final ServiceTicket stMock = createMockServiceTicket(ST_ID, service1);
+        val service1 = getService(SVC1_ID);
+        val stMock = createMockServiceTicket(ST_ID, service1);
 
-        final TicketGrantingTicket tgtRootMock = createRootTicketGrantingTicket();
+        val tgtRootMock = createRootTicketGrantingTicket();
 
-        final TicketGrantingTicket tgtMock = createMockTicketGrantingTicket(TGT_ID, stMock, false,
+        val tgtMock = createMockTicketGrantingTicket(TGT_ID, stMock, false,
             tgtRootMock, new ArrayList<>());
         when(tgtMock.getProxiedBy()).thenReturn(getService("proxiedBy"));
 
-        final List<Authentication> authnListMock = mock(List.class);
+        val authnListMock = mock(List.class);
         // Size is required to be 2, so that we can simulate proxying capabilities
         when(authnListMock.size()).thenReturn(2);
         when(authnListMock.toArray()).thenReturn(new Object[]{this.authentication, this.authentication});
@@ -177,18 +207,18 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
         when(tgtMock.getChainedAuthentications()).thenReturn(authnListMock);
         when(stMock.getTicketGrantingTicket()).thenReturn(tgtMock);
 
-        final Service service2 = getService(SVC2_ID);
-        final ServiceTicket stMock2 = createMockServiceTicket(ST2_ID, service2);
+        val service2 = getService(SVC2_ID);
+        val stMock2 = createMockServiceTicket(ST2_ID, service2);
 
-        final TicketGrantingTicket tgtMock2 = createMockTicketGrantingTicket(TGT2_ID, stMock2, false, tgtRootMock, authnListMock);
+        val tgtMock2 = createMockTicketGrantingTicket(TGT2_ID, stMock2, false, tgtRootMock, authnListMock);
 
         mockTicketRegistry(stMock, tgtMock, stMock2, tgtMock2);
-        final ServicesManager smMock = getServicesManager(service1, service2);
-        final TicketFactory factory = getTicketFactory();
+        val smMock = getServicesManager(service1, service2);
+        val factory = getTicketFactory();
 
         final AuthenticationServiceSelectionPlan authenticationRequestServiceSelectionStrategies =
             new DefaultAuthenticationServiceSelectionPlan(new DefaultAuthenticationServiceSelectionStrategy());
-        final AuditableExecution enforcer = mock(AuditableExecution.class);
+        val enforcer = mock(AuditableExecution.class);
         when(enforcer.execute(any())).thenReturn(new AuditableExecutionResult());
         this.cas = new DefaultCentralAuthenticationService(
             mock(ApplicationEventPublisher.class), ticketRegMock, smMock,
@@ -200,7 +230,7 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
     }
 
     private TicketFactory getTicketFactory() {
-        final DefaultTicketFactory factory = new DefaultTicketFactory();
+        val factory = new DefaultTicketFactory();
         factory.addTicketFactory(ProxyGrantingTicket.class,
             new DefaultProxyGrantingTicketFactory(null, null, null));
         factory.addTicketFactory(TicketGrantingTicket.class,
@@ -215,21 +245,9 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
     }
 
     private AuthenticationResult getAuthenticationContext() {
-        final AuthenticationResult ctx = mock(AuthenticationResult.class);
+        val ctx = mock(AuthenticationResult.class);
         when(ctx.getAuthentication()).thenReturn(this.authentication);
         return ctx;
-    }
-
-    private static ServicesManager getServicesManager(final Service service1, final Service service2) {
-        final RegisteredService mockRegSvc1 = createMockRegisteredService(service1.getId(), true, getServiceProxyPolicy(false));
-        final RegisteredService mockRegSvc2 = createMockRegisteredService("test", false, getServiceProxyPolicy(true));
-        final RegisteredService mockRegSvc3 = createMockRegisteredService(service2.getId(), true, getServiceProxyPolicy(true));
-
-        final ServicesManager smMock = mock(ServicesManager.class);
-        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher(service1.getId())))).thenReturn(mockRegSvc1);
-        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher("test")))).thenReturn(mockRegSvc2);
-        when(smMock.findServiceBy(argThat(new VerifyServiceByIdMatcher(service2.getId())))).thenReturn(mockRegSvc3);
-        return smMock;
     }
 
     private void mockTicketRegistry(final ServiceTicket stMock, final TicketGrantingTicket tgtMock,
@@ -274,17 +292,17 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
 
     @Test
     public void getTicketsWithNoPredicate() {
-        final Collection<Ticket> c = this.cas.getTickets(ticket -> true);
+        val c = this.cas.getTickets(ticket -> true);
         assertEquals(c.size(), this.ticketRegMock.getTickets().size());
     }
 
     @Test
     public void verifyChainedAuthenticationsOnValidation() {
-        final Service svc = RegisteredServiceTestUtils.getService(SVC2_ID);
-        final ServiceTicket st = this.cas.grantServiceTicket(TGT2_ID, svc, getAuthenticationContext());
+        val svc = RegisteredServiceTestUtils.getService(SVC2_ID);
+        val st = this.cas.grantServiceTicket(TGT2_ID, svc, getAuthenticationContext());
         assertNotNull(st);
 
-        final Assertion assertion = this.cas.validateServiceTicket(st.getId(), svc);
+        val assertion = this.cas.validateServiceTicket(st.getId(), svc);
         assertNotNull(assertion);
 
         assertEquals(assertion.getService(), svc);
@@ -295,7 +313,7 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
     }
 
     private TicketGrantingTicket createRootTicketGrantingTicket() {
-        final TicketGrantingTicket tgtRootMock = mock(TicketGrantingTicket.class);
+        val tgtRootMock = mock(TicketGrantingTicket.class);
         when(tgtRootMock.isExpired()).thenReturn(false);
         when(tgtRootMock.getAuthentication()).thenReturn(this.authentication);
         return tgtRootMock;
@@ -303,11 +321,11 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
 
     private TicketGrantingTicket createMockTicketGrantingTicket(final String id, final ServiceTicket svcTicket, final boolean isExpired,
                                                                 final TicketGrantingTicket root, final List<Authentication> chainedAuthnList) {
-        final TicketGrantingTicket tgtMock = mock(TicketGrantingTicket.class);
+        val tgtMock = mock(TicketGrantingTicket.class);
         when(tgtMock.isExpired()).thenReturn(isExpired);
         when(tgtMock.getId()).thenReturn(id);
 
-        final String svcId = svcTicket.getService().getId();
+        val svcId = svcTicket.getService().getId();
         when(tgtMock.grantServiceTicket(anyString(), argThat(new VerifyServiceByIdMatcher(svcId)),
             any(ExpirationPolicy.class), anyBoolean(), anyBoolean())).thenReturn(svcTicket);
         when(tgtMock.getRoot()).thenReturn(root);
@@ -318,38 +336,16 @@ public class DefaultCentralAuthenticationServiceMockitoTests {
         return tgtMock;
     }
 
-    private static ServiceTicket createMockServiceTicket(final String id, final Service svc) {
-        final ServiceTicket stMock = mock(ServiceTicket.class);
-        when(stMock.getService()).thenReturn(svc);
-        when(stMock.getId()).thenReturn(id);
-        when(stMock.isValidFor(svc)).thenReturn(true);
-        return stMock;
-    }
+    private static class VerifyServiceByIdMatcher implements ArgumentMatcher<Service> {
+        private final String id;
 
-    private static RegisteredServiceProxyPolicy getServiceProxyPolicy(final boolean canProxy) {
-        if (!canProxy) {
-            return new RefuseRegisteredServiceProxyPolicy();
+        VerifyServiceByIdMatcher(final String id) {
+            this.id = id;
         }
 
-        return new RegexMatchingRegisteredServiceProxyPolicy(".*");
-    }
-
-    private static RegisteredService createMockRegisteredService(final String svcId,
-                                                                 final boolean enabled, final RegisteredServiceProxyPolicy proxy) {
-        final RegisteredService mockRegSvc = mock(RegisteredService.class);
-        when(mockRegSvc.getServiceId()).thenReturn(svcId);
-        when(mockRegSvc.getProxyPolicy()).thenReturn(proxy);
-        when(mockRegSvc.getName()).thenReturn(svcId);
-        when(mockRegSvc.matches(argThat(new VerifyServiceByIdMatcher(svcId)))).thenReturn(true);
-        when(mockRegSvc.getAttributeReleasePolicy()).thenReturn(new ReturnAllAttributeReleasePolicy());
-        when(mockRegSvc.getUsernameAttributeProvider()).thenReturn(new DefaultRegisteredServiceUsernameProvider());
-        when(mockRegSvc.getAccessStrategy()).thenReturn(new DefaultRegisteredServiceAccessStrategy(enabled, true));
-        return mockRegSvc;
-    }
-
-    private static Service getService(final String name) {
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addParameter(CasProtocolConstants.PARAMETER_SERVICE, name);
-        return new WebApplicationServiceFactory().createService(request);
+        @Override
+        public boolean matches(final Service s) {
+            return s != null && s.getId().equals(this.id);
+        }
     }
 }

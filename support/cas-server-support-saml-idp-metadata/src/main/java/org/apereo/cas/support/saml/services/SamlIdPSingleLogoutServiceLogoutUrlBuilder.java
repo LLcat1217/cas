@@ -1,6 +1,5 @@
 package org.apereo.cas.support.saml.services;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.logout.DefaultSingleLogoutServiceLogoutUrlBuilder;
 import org.apereo.cas.services.RegisteredService;
@@ -10,9 +9,11 @@ import org.apereo.cas.support.saml.services.idp.metadata.cache.SamlRegisteredSer
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.web.UrlValidator;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.net.URL;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * This is {@link SamlIdPSingleLogoutServiceLogoutUrlBuilder}.
@@ -46,7 +47,7 @@ public class SamlIdPSingleLogoutServiceLogoutUrlBuilder extends DefaultSingleLog
 
         try {
             if (registeredService instanceof SamlRegisteredService) {
-                final URL location = buildLogoutUrl(registeredService, singleLogoutService);
+                val location = buildLogoutUrl(registeredService, singleLogoutService);
                 if (location != null) {
                     LOGGER.info("Final logout URL built for [{}] is [{}]", registeredService, location);
                     return CollectionUtils.wrap(location);
@@ -61,18 +62,18 @@ public class SamlIdPSingleLogoutServiceLogoutUrlBuilder extends DefaultSingleLog
 
     private URL buildLogoutUrl(final RegisteredService registeredService, final WebApplicationService singleLogoutService) throws Exception {
         LOGGER.debug("Building logout url for SAML service [{}]", registeredService);
-        final String entityID = singleLogoutService.getId();
+        val entityID = singleLogoutService.getId();
         LOGGER.debug("Located entity id [{}]", entityID);
 
-        final Optional<SamlRegisteredServiceServiceProviderMetadataFacade> adaptor =
-                SamlRegisteredServiceServiceProviderMetadataFacade.get(this.samlRegisteredServiceCachingMetadataResolver,
-                        SamlRegisteredService.class.cast(registeredService), entityID);
+        val adaptor =
+            SamlRegisteredServiceServiceProviderMetadataFacade.get(this.samlRegisteredServiceCachingMetadataResolver,
+                SamlRegisteredService.class.cast(registeredService), entityID);
 
         if (!adaptor.isPresent()) {
             LOGGER.warn("Cannot find metadata linked to [{}]", entityID);
             return null;
         }
-        final String location = adaptor.get().getSingleLogoutService().getLocation();
+        val location = adaptor.get().getSingleLogoutService().getLocation();
         return new URL(location);
     }
 }

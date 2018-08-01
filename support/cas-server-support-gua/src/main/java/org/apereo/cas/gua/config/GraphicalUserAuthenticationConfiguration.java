@@ -1,9 +1,6 @@
 package org.apereo.cas.gua.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.gua.GraphicalUserAuthenticationProperties;
 import org.apereo.cas.gua.api.UserGraphicalAuthenticationRepository;
 import org.apereo.cas.gua.impl.LdapUserGraphicalAuthenticationRepository;
 import org.apereo.cas.gua.impl.StaticUserGraphicalAuthenticationRepository;
@@ -15,6 +12,9 @@ import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer;
 import org.apereo.cas.web.flow.DisplayUserGraphicsBeforeAuthenticationAction;
 import org.apereo.cas.web.flow.GraphicalUserAuthenticationWebflowConfigurer;
 import org.apereo.cas.web.flow.PrepareForGraphicalAuthenticationAction;
+
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,7 +37,6 @@ import org.springframework.webflow.execution.Action;
  */
 @Configuration("graphicalUserAuthenticationConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class GraphicalUserAuthenticationConfiguration implements CasWebflowExecutionPlanConfigurer {
 
     @Autowired
@@ -69,7 +68,7 @@ public class GraphicalUserAuthenticationConfiguration implements CasWebflowExecu
     @RefreshScope
     @ConditionalOnMissingBean(name = "userGraphicalAuthenticationRepository")
     public UserGraphicalAuthenticationRepository userGraphicalAuthenticationRepository() {
-        final GraphicalUserAuthenticationProperties gua = casProperties.getAuthn().getGua();
+        val gua = casProperties.getAuthn().getGua();
         if (gua.getResource().getLocation() != null) {
             return new StaticUserGraphicalAuthenticationRepository(gua.getResource().getLocation());
         }

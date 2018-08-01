@@ -3,13 +3,11 @@ package org.apereo.cas.support.spnego.authentication.handler.support;
 import jcifs.Config;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-
-import javax.annotation.PostConstruct;
-import java.net.URL;
 
 /**
  * Configuration helper for JCIFS and the Spring framework.
@@ -20,7 +18,7 @@ import java.net.URL;
  * @since 4.2.0
  */
 @Slf4j
-public class JcifsConfig {
+public class JcifsConfig implements InitializingBean {
 
     private static final String DEFAULT_LOGIN_CONFIG = "/login.conf";
 
@@ -69,7 +67,7 @@ public class JcifsConfig {
     private ResourceLoader resourceLoader;
 
     /**
-     * Instantiates a new jCIFS config.
+     * Instantiates a new JCIFS config.
      */
     public JcifsConfig() {
         Config.setProperty(JCIFS_PROP_CLIENT_SOTIMEOUT, "300000");
@@ -79,9 +77,13 @@ public class JcifsConfig {
     /**
      * Init.
      */
-    @PostConstruct
     public void init() {
         configureJaasLoginConfig();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        init();
     }
 
     /**
@@ -90,26 +92,27 @@ public class JcifsConfig {
     @SneakyThrows
     protected void configureJaasLoginConfig() {
 
-        final String propValue = System.getProperty(SYS_PROP_LOGIN_CONF);
+        val propValue = System.getProperty(SYS_PROP_LOGIN_CONF);
         if (StringUtils.isNotBlank(propValue)) {
             LOGGER.info("Found login config [{}] in system property [{}]", propValue, SYS_PROP_LOGIN_CONF);
             if (StringUtils.isNotBlank(this.loginConf)) {
                 LOGGER.warn("Configured login config for CAS under [{}] will be ignored", this.loginConf);
             }
         } else {
-            final String loginConf = StringUtils.isBlank(this.loginConf) ? DEFAULT_LOGIN_CONFIG : this.loginConf;
+            val loginConf = StringUtils.isBlank(this.loginConf) ? DEFAULT_LOGIN_CONFIG : this.loginConf;
             LOGGER.debug("Attempting to load login config from [{}]", loginConf);
 
-            final Resource res = this.resourceLoader.getResource(loginConf);
+            val res = this.resourceLoader.getResource(loginConf);
             if (res != null && res.exists()) {
-                final String urlPath = res.getURL().toExternalForm();
+                val urlPath = res.getURL().toExternalForm();
                 LOGGER.debug("Located login config [{}] and configured it under [{}]", urlPath, SYS_PROP_LOGIN_CONF);
                 System.setProperty(SYS_PROP_LOGIN_CONF, urlPath);
             } else {
-                final URL url = getClass().getResource("/jcifs/http/login.conf");
+                val url = getClass().getResource("/jcifs/http/login.conf");
                 if (url != null) {
-                    LOGGER.debug("Falling back unto default login config [{}] under [{}]", url.toExternalForm(), SYS_PROP_LOGIN_CONF);
-                    System.setProperty(SYS_PROP_LOGIN_CONF, url.toExternalForm());
+                    val fullUrl = url.toExternalForm();
+                    LOGGER.debug("Falling back unto default login config [{}] under [{}]", fullUrl, SYS_PROP_LOGIN_CONF);
+                    System.setProperty(SYS_PROP_LOGIN_CONF, fullUrl);
                 }
             }
             LOGGER.debug("configured login configuration path : [{}]", propValue);
@@ -124,7 +127,7 @@ public class JcifsConfig {
      */
     public void setJcifsServicePassword(final String jcifsServicePassword) {
         if (StringUtils.isNotBlank(jcifsServicePassword)) {
-            LOGGER.debug("jcifsServicePassword is set to *****");
+            LOGGER.debug("jcifsServicePassword is set");
             Config.setProperty(JCIFS_PROP_SERVICE_PASSWORD, jcifsServicePassword);
         }
     }
@@ -148,7 +151,6 @@ public class JcifsConfig {
      */
     public void setKerberosConf(final String kerberosConf) {
         if (StringUtils.isNotBlank(kerberosConf)) {
-
             LOGGER.debug("kerberosConf is set to :[{}]", kerberosConf);
             System.setProperty(SYS_PROP_KERBEROS_CONF, kerberosConf);
         }

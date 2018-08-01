@@ -1,6 +1,5 @@
 package org.apereo.cas.web.flow;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationMetadataConfiguration;
@@ -25,6 +24,9 @@ import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCaptchaConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.webflow.context.servlet.ServletExternalContext;
 import org.springframework.webflow.execution.Action;
-import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.test.MockRequestContext;
 
 import java.nio.charset.StandardCharsets;
@@ -90,18 +91,18 @@ public class ValidateCaptchaActionTests {
 
     @Test
     public void verifyCaptchaValidated() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
 
-        final String data = "{\"success\": true }";
+        val data = "{\"success\": true }";
         request.addParameter(ValidateCaptchaAction.REQUEST_PARAM_RECAPTCHA_RESPONSE, data);
 
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
 
-        try (MockWebServer webServer = new MockWebServer(9294,
+        try (val webServer = new MockWebServer(9294,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
-            final Event result = validateCaptchaAction.execute(context);
+            val result = validateCaptchaAction.execute(context);
             assertNull(result);
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
@@ -110,14 +111,14 @@ public class ValidateCaptchaActionTests {
 
     @Test
     public void verifyCaptchaFails() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
 
-        try (MockWebServer webServer = new MockWebServer(9294,
+        try (val webServer = new MockWebServer(9294,
             new ByteArrayResource(StringUtils.EMPTY.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
-            final Event result = validateCaptchaAction.execute(context);
+            val result = validateCaptchaAction.execute(context);
             assertNotNull(result);
             assertEquals(ValidateCaptchaAction.EVENT_ID_ERROR, result.getId());
         } catch (final Exception e) {

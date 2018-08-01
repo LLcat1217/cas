@@ -1,11 +1,8 @@
 package org.apereo.cas.web.support.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
 import org.apereo.cas.config.CasCoreUtilConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.throttle.ThrottleProperties;
 import org.apereo.cas.web.support.AuthenticationThrottlingExecutionPlan;
 import org.apereo.cas.web.support.AuthenticationThrottlingExecutionPlanConfigurer;
 import org.apereo.cas.web.support.DefaultAuthenticationThrottlingExecutionPlan;
@@ -14,6 +11,10 @@ import org.apereo.cas.web.support.InMemoryThrottledSubmissionByIpAddressHandlerI
 import org.apereo.cas.web.support.InMemoryThrottledSubmissionCleaner;
 import org.apereo.cas.web.support.NoOpThrottledSubmissionHandlerInterceptor;
 import org.apereo.cas.web.support.ThrottledSubmissionHandlerInterceptor;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +53,7 @@ public class CasThrottlingConfiguration {
     @Bean
     @Lazy
     public ThrottledSubmissionHandlerInterceptor authenticationThrottle() {
-        final ThrottleProperties throttle = casProperties.getAuthn().getThrottle();
+        val throttle = casProperties.getAuthn().getThrottle();
 
         if (throttle.getFailure().getRangeSeconds() <= 0 && throttle.getFailure().getThreshold() <= 0) {
             LOGGER.debug("Authentication throttling is disabled since no range-seconds or failure-threshold is defined");
@@ -81,9 +82,9 @@ public class CasThrottlingConfiguration {
     @ConditionalOnMissingBean(name = "authenticationThrottlingExecutionPlan")
     @Bean
     public AuthenticationThrottlingExecutionPlan authenticationThrottlingExecutionPlan(final List<AuthenticationThrottlingExecutionPlanConfigurer> configurers) {
-        final DefaultAuthenticationThrottlingExecutionPlan plan = new DefaultAuthenticationThrottlingExecutionPlan();
+        val plan = new DefaultAuthenticationThrottlingExecutionPlan();
         configurers.forEach(c -> {
-            final String name = StringUtils.removePattern(c.getClass().getSimpleName(), "\\$.+");
+            val name = StringUtils.removePattern(c.getClass().getSimpleName(), "\\$.+");
             LOGGER.debug("Registering authentication throttler [{}]", name);
             c.configureAuthenticationThrottlingExecutionPlan(plan);
         });

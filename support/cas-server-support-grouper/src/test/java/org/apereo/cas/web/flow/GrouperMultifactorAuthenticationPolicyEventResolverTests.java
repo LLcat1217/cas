@@ -1,7 +1,5 @@
 package org.apereo.cas.web.flow;
 
-import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
-import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.mfa.TestMultifactorAuthenticationProvider;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
@@ -24,6 +22,10 @@ import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
 import org.apereo.cas.web.flow.resolver.CasWebflowEventResolver;
 import org.apereo.cas.web.support.WebUtils;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
+import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +45,7 @@ import org.springframework.webflow.context.servlet.ServletExternalContext;
 import org.springframework.webflow.engine.Transition;
 import org.springframework.webflow.engine.support.DefaultTargetStateResolver;
 import org.springframework.webflow.engine.support.DefaultTransitionCriteria;
-import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.test.MockRequestContext;
-
-import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -89,18 +88,18 @@ public class GrouperMultifactorAuthenticationPolicyEventResolverTests {
 
     @Test
     public void verifyOperation() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
 
         WebUtils.putService(context, CoreAuthenticationTestUtils.getWebApplicationService());
         TestMultifactorAuthenticationProvider.registerProviderIntoApplicationContext(applicationContext);
         WebUtils.putAuthentication(CoreAuthenticationTestUtils.getAuthentication(), context);
 
-        final DefaultTargetStateResolver targetResolver = new DefaultTargetStateResolver(TestMultifactorAuthenticationProvider.ID);
-        final Transition transition = new Transition(new DefaultTransitionCriteria(new LiteralExpression(TestMultifactorAuthenticationProvider.ID)), targetResolver);
+        val targetResolver = new DefaultTargetStateResolver(TestMultifactorAuthenticationProvider.ID);
+        val transition = new Transition(new DefaultTransitionCriteria(new LiteralExpression(TestMultifactorAuthenticationProvider.ID)), targetResolver);
         context.getRootFlow().getGlobalTransitionSet().add(transition);
-        final Set<Event> event = resolver.resolve(context);
+        val event = resolver.resolve(context);
         assertEquals(1, event.size());
         assertEquals(TestMultifactorAuthenticationProvider.ID, event.iterator().next().getId());
     }
@@ -109,13 +108,13 @@ public class GrouperMultifactorAuthenticationPolicyEventResolverTests {
     public static class GrouperTestConfiguration {
         @Bean
         public GrouperFacade grouperFacade() {
-            final WsGroup group = new WsGroup();
+            val group = new WsGroup();
             group.setName(TestMultifactorAuthenticationProvider.ID);
             group.setDisplayName("Apereo CAS");
             group.setDescription("CAS Authentication with Apereo");
-            final WsGetGroupsResult result = new WsGetGroupsResult();
+            val result = new WsGetGroupsResult();
             result.setWsGroups(new WsGroup[]{group});
-            final GrouperFacade facade = mock(GrouperFacade.class);
+            val facade = mock(GrouperFacade.class);
             when(facade.getGroupsForSubjectId(anyString())).thenReturn(CollectionUtils.wrapList(result));
             return facade;
         }

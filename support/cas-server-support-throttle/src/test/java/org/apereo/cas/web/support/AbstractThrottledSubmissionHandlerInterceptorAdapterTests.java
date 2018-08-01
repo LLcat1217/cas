@@ -1,10 +1,13 @@
 package org.apereo.cas.web.support;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
 import org.apereo.cas.config.CasCoreUtilConfiguration;
 import org.apereo.cas.web.support.config.CasThrottlingConfiguration;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.http.HttpStatus;
 import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.junit.After;
@@ -22,6 +25,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -50,15 +55,15 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapterTests 
     protected ThrottledSubmissionHandlerInterceptor throttle;
 
     @Before
-    public void setUp() {
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+    public void initialize() {
+        val request = new MockHttpServletRequest();
         request.setRemoteAddr(IP_ADDRESS);
         request.setLocalAddr(IP_ADDRESS);
         ClientInfoHolder.setClientInfo(new ClientInfo(request));
     }
 
     @After
-    public void tearDown() {
+    public void afterEachTest() {
         ClientInfoHolder.setClientInfo(null);
     }
 
@@ -77,17 +82,21 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapterTests 
     }
 
 
+    @SneakyThrows
     private void failLoop(final int trials, final int period, final int expected) throws Exception {
         // Seed with something to compare against
         loginUnsuccessfully("mog", "1.2.3.4");
 
-        for (int i = 0; i < trials; i++) {
-            LOGGER.debug("Waiting for [{}] ms", period);
-            Thread.sleep(period);
-
-            final MockHttpServletResponse status = loginUnsuccessfully("mog", "1.2.3.4");
-            assertEquals(expected, status.getStatus());
-        }
+        IntStream.range(0, trials).forEach(i -> {
+            try {
+                LOGGER.debug("Waiting for [{}] ms", period);
+                Thread.sleep(period);
+                val status = loginUnsuccessfully("mog", "1.2.3.4");
+                assertEquals(expected, status.getStatus());
+            } catch (final Exception e) {
+                throw new AssertionError(e.getMessage(), e);
+            }
+        });
     }
 
 

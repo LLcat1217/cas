@@ -23,6 +23,8 @@ import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
 import org.apereo.cas.web.flow.resolver.CasWebflowEventResolver;
 import org.apereo.cas.web.support.WebUtils;
+
+import lombok.val;
 import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.junit.Before;
@@ -47,10 +49,7 @@ import org.springframework.webflow.context.servlet.ServletExternalContext;
 import org.springframework.webflow.engine.Transition;
 import org.springframework.webflow.engine.support.DefaultTargetStateResolver;
 import org.springframework.webflow.engine.support.DefaultTransitionCriteria;
-import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.test.MockRequestContext;
-
-import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -98,7 +97,7 @@ public class AdaptiveMultifactorAuthenticationPolicyEventResolverTests {
     private MockHttpServletRequest request;
 
     @Before
-    public void setup() {
+    public void initialize() {
         this.context = new MockRequestContext();
 
         request = new MockHttpServletRequest();
@@ -106,11 +105,11 @@ public class AdaptiveMultifactorAuthenticationPolicyEventResolverTests {
         request.setLocalAddr("195.88.151.11");
 
 
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+        val response = new MockHttpServletResponse();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, response));
 
-        final DefaultTargetStateResolver targetResolver = new DefaultTargetStateResolver(TestMultifactorAuthenticationProvider.ID);
-        final Transition transition = new Transition(new DefaultTransitionCriteria(
+        val targetResolver = new DefaultTargetStateResolver(TestMultifactorAuthenticationProvider.ID);
+        val transition = new Transition(new DefaultTransitionCriteria(
             new LiteralExpression(TestMultifactorAuthenticationProvider.ID)), targetResolver);
         context.getRootFlow().getGlobalTransitionSet().add(transition);
 
@@ -123,7 +122,7 @@ public class AdaptiveMultifactorAuthenticationPolicyEventResolverTests {
     public void verifyOperationNeedsMfa() {
         request.addHeader(HttpRequestUtils.USER_AGENT_HEADER, "MSIE");
         ClientInfoHolder.setClientInfo(new ClientInfo(request));
-        final Set<Event> event = resolver.resolve(context);
+        val event = resolver.resolve(context);
         assertEquals(1, event.size());
         assertEquals(TestMultifactorAuthenticationProvider.ID, event.iterator().next().getId());
     }
@@ -133,7 +132,7 @@ public class AdaptiveMultifactorAuthenticationPolicyEventResolverTests {
         request.addHeader(HttpRequestUtils.USER_AGENT_HEADER, "FIREFOX");
         request.addParameter("geolocation", "1000,1000,1000,1000");
         ClientInfoHolder.setClientInfo(new ClientInfo(request));
-        final Set<Event> event = resolver.resolve(context);
+        val event = resolver.resolve(context);
         assertEquals(1, event.size());
         assertEquals(TestMultifactorAuthenticationProvider.ID, event.iterator().next().getId());
     }
@@ -142,8 +141,8 @@ public class AdaptiveMultifactorAuthenticationPolicyEventResolverTests {
     public static class GeoLocationServiceTestConfiguration {
         @Bean
         public GeoLocationService geoLocationService() {
-            final GeoLocationService service = mock(GeoLocationService.class);
-            final GeoLocationResponse response = new GeoLocationResponse();
+            val service = mock(GeoLocationService.class);
+            val response = new GeoLocationResponse();
             response.addAddress("MSIE");
             when(service.locate(anyString(), any(GeoLocationRequest.class))).thenReturn(response);
             return service;

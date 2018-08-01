@@ -2,6 +2,8 @@ package org.apereo.cas.support.saml.web.idp.audit;
 
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opensaml.saml.saml2.core.Assertion;
@@ -27,21 +29,21 @@ import static org.mockito.Mockito.*;
 public class SamlResponseAuditPrincipalIdProviderTests {
     @Test
     public void verifyAction() {
-        final SamlResponseAuditPrincipalIdProvider r = new SamlResponseAuditPrincipalIdProvider();
-        final Response response = mock(Response.class);
-        final Issuer issuer = mock(Issuer.class);
+        val r = new SamlResponseAuditPrincipalIdProvider();
+        val response = mock(Response.class);
+        val issuer = mock(Issuer.class);
         when(issuer.getValue()).thenReturn("https://idp.example.org");
         when(response.getIssuer()).thenReturn(issuer);
         when(response.getDestination()).thenReturn("https://sp.example.org");
 
-        final Assertion assertion = mock(Assertion.class);
-        final Subject subject = mock(Subject.class);
-        final NameID nameId = mock(NameID.class);
+        val assertion = mock(Assertion.class);
+        val subject = mock(Subject.class);
+        val nameId = mock(NameID.class);
         when(nameId.getValue()).thenReturn("casuser");
         when(subject.getNameID()).thenReturn(nameId);
         when(assertion.getSubject()).thenReturn(subject);
         when(response.getAssertions()).thenReturn(CollectionUtils.wrapList(assertion));
-        final String result = r.getPrincipalIdFrom(CoreAuthenticationTestUtils.getAuthentication(), response, null);
+        val result = r.getPrincipalIdFrom(CoreAuthenticationTestUtils.getAuthentication(), response, null);
         assertNotNull(result);
         assertEquals("casuser", result);
         assertTrue(r.supports(CoreAuthenticationTestUtils.getAuthentication(), response, null));

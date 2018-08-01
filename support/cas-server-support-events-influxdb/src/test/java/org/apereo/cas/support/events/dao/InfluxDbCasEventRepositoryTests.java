@@ -10,6 +10,8 @@ import org.apereo.cas.util.junit.ConditionalIgnore;
 import org.apereo.cas.util.junit.ConditionalIgnoreRule;
 import org.apereo.cas.util.junit.RunningContinuousIntegrationCondition;
 import org.apereo.cas.web.support.WebUtils;
+
+import lombok.val;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,7 +24,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
-import java.util.Collection;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -57,20 +58,20 @@ public class InfluxDbCasEventRepositoryTests {
 
     @Test
     public void verifyEventsStored() {
-        final CasEvent dto = getCasEvent();
+        val dto = getCasEvent();
         casEventRepository.save(dto);
-        Collection events = casEventRepository.load();
+        val events = casEventRepository.load();
         assertFalse(events.isEmpty());
-        events = casEventRepository.getEventsForPrincipal(dto.getPrincipalId());
-        assertFalse(events.isEmpty());
-        events = casEventRepository.getEventsOfType(dto.getType());
-        assertFalse(events.isEmpty());
+        val events2 = casEventRepository.getEventsForPrincipal(dto.getPrincipalId());
+        assertFalse(events2.isEmpty());
+        val events3 = casEventRepository.getEventsOfType(dto.getType());
+        assertFalse(events3.isEmpty());
     }
 
     private CasEvent getCasEvent() {
-        final CasEvent dto = new CasEvent();
+        val dto = new CasEvent();
         dto.setType(CasAuthenticationTransactionSuccessfulEvent.class.getCanonicalName());
-        final long timestamp = new Date().getTime();
+        val timestamp = new Date().getTime();
         dto.putTimestamp(timestamp);
         dto.setCreationTime(DateTimeUtils.zonedDateTimeOf(timestamp).toString());
         dto.putClientIpAddress("1.2.3.4");
@@ -78,7 +79,7 @@ public class InfluxDbCasEventRepositoryTests {
         dto.putId("1000");
         dto.putAgent(WebUtils.getHttpServletRequestUserAgentFromRequestContext());
 
-        final GeoLocationRequest location = new GeoLocationRequest(1234, 1234);
+        val location = new GeoLocationRequest(1234, 1234);
         dto.putGeoLocation(location);
         dto.setPrincipalId("casuser");
         return dto;

@@ -1,8 +1,5 @@
 package org.apereo.cas.oidc.web;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.apereo.cas.oidc.OidcConstants;
 import org.apereo.cas.oidc.token.OidcIdTokenGeneratorService;
 import org.apereo.cas.support.oauth.OAuth20Constants;
@@ -14,6 +11,11 @@ import org.apereo.cas.support.oauth.web.response.callback.OAuth20TokenAuthorizat
 import org.apereo.cas.ticket.ExpirationPolicy;
 import org.apereo.cas.ticket.accesstoken.AccessToken;
 import org.apereo.cas.ticket.refreshtoken.RefreshToken;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.pac4j.core.context.J2EContext;
 import org.springframework.web.servlet.View;
 
@@ -47,9 +49,9 @@ public class OidcImplicitIdTokenAuthorizationResponseBuilder extends OAuth20Toke
                                                 final RefreshToken refreshToken,
                                                 final J2EContext context) throws Exception {
 
-        final String idToken = this.idTokenGenerator.generate(context.getRequest(),
-                context.getResponse(), accessToken, idTokenExpirationPolicy.getTimeToLive(),
-                OAuth20ResponseTypes.IDTOKEN_TOKEN, holder.getRegisteredService());
+        val idToken = this.idTokenGenerator.generate(context.getRequest(),
+            context.getResponse(), accessToken, idTokenExpirationPolicy.getTimeToLive(),
+            OAuth20ResponseTypes.IDTOKEN_TOKEN, holder.getRegisteredService());
         LOGGER.debug("Generated id token [{}]", idToken);
         params.add(new BasicNameValuePair(OidcConstants.ID_TOKEN, idToken));
         return super.buildCallbackUrlResponseType(holder, redirectUri, accessToken, params, refreshToken, context);
@@ -57,7 +59,7 @@ public class OidcImplicitIdTokenAuthorizationResponseBuilder extends OAuth20Toke
 
     @Override
     public boolean supports(final J2EContext context) {
-        final String responseType = context.getRequestParameter(OAuth20Constants.RESPONSE_TYPE);
+        val responseType = context.getRequestParameter(OAuth20Constants.RESPONSE_TYPE);
         return OAuth20Utils.isResponseType(responseType, OAuth20ResponseTypes.IDTOKEN_TOKEN);
     }
 }

@@ -1,26 +1,23 @@
 package org.apereo.cas.web.view.json;
 
+import org.apereo.cas.authentication.AuthenticationAttributeReleasePolicy;
+import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
+import org.apereo.cas.authentication.ProtocolAttributeEncoder;
+import org.apereo.cas.services.ServicesManager;
+import org.apereo.cas.validation.CasProtocolAttributesRenderer;
+import org.apereo.cas.web.view.Cas30ResponseView;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apereo.cas.authentication.Authentication;
-import org.apereo.cas.authentication.AuthenticationAttributeReleasePolicy;
-import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
-import org.apereo.cas.authentication.ProtocolAttributeEncoder;
-import org.apereo.cas.authentication.principal.Principal;
-import org.apereo.cas.services.ServicesManager;
-import org.apereo.cas.validation.CasProtocolAttributesRenderer;
-import org.apereo.cas.web.view.Cas30ResponseView;
+import lombok.val;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,7 +33,6 @@ import java.util.stream.Collectors;
  * @author Misagh Moayyed
  * @since 4.2
  */
-@Slf4j
 @ToString
 @Getter
 @Setter
@@ -74,7 +70,7 @@ public class Cas30JsonResponseView extends Cas30ResponseView {
     }
 
     private static MappingJackson2JsonView createDelegatedView() {
-        final MappingJackson2JsonView view = new MappingJackson2JsonView();
+        val view = new MappingJackson2JsonView();
         view.setPrettyPrint(true);
         view.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).findAndRegisterModules();
         return view;
@@ -82,21 +78,21 @@ public class Cas30JsonResponseView extends Cas30ResponseView {
 
     @Override
     protected void prepareMergedOutputModel(final Map<String, Object> model, final HttpServletRequest request, final HttpServletResponse response) {
-        final CasJsonServiceResponse casResponse = new CasJsonServiceResponse();
+        val casResponse = new CasJsonServiceResponse();
         try {
             super.prepareMergedOutputModel(model, request, response);
             if (getAssertionFrom(model) != null) {
-                final CasJsonServiceResponseAuthenticationSuccess success = createAuthenticationSuccess(model);
+                val success = createAuthenticationSuccess(model);
                 casResponse.setAuthenticationSuccess(success);
             } else {
-                final CasJsonServiceResponseAuthenticationFailure failure = createAuthenticationFailure(model);
+                val failure = createAuthenticationFailure(model);
                 casResponse.setAuthenticationFailure(failure);
             }
         } catch (final Exception e) {
-            final CasJsonServiceResponseAuthenticationFailure failure = createAuthenticationFailure(model);
+            val failure = createAuthenticationFailure(model);
             casResponse.setAuthenticationFailure(failure);
         } finally {
-            final Map<String, Object> casModel = new HashMap<>();
+            val casModel = new HashMap<String, Object>();
             casModel.put(ATTRIBUTE_NAME_MODEL_SERVICE_RESPONSE, casResponse);
             model.clear();
             model.putAll(casModel);
@@ -104,29 +100,25 @@ public class Cas30JsonResponseView extends Cas30ResponseView {
     }
 
     private CasJsonServiceResponseAuthenticationFailure createAuthenticationFailure(final Map<String, Object> model) {
-        final CasJsonServiceResponseAuthenticationFailure failure = new CasJsonServiceResponseAuthenticationFailure();
+        val failure = new CasJsonServiceResponseAuthenticationFailure();
         failure.setCode(getErrorCodeFrom(model));
         failure.setDescription(getErrorDescriptionFrom(model));
         return failure;
     }
 
     private CasJsonServiceResponseAuthenticationSuccess createAuthenticationSuccess(final Map<String, Object> model) {
-        final CasJsonServiceResponseAuthenticationSuccess success = new CasJsonServiceResponseAuthenticationSuccess();
+        val success = new CasJsonServiceResponseAuthenticationSuccess();
         success.setAttributes(getModelAttributes(model));
-        final Principal principal = getPrincipal(model);
+        val principal = getPrincipal(model);
         success.setUser(principal.getId());
         success.setProxyGrantingTicket(getProxyGrantingTicketIou(model));
-        final Collection<Authentication> chainedAuthentications = getChainedAuthentications(model);
+        val chainedAuthentications = getChainedAuthentications(model);
         if (chainedAuthentications != null && !chainedAuthentications.isEmpty()) {
-            final List<String> proxies = chainedAuthentications.stream().map(authn -> authn.getPrincipal().getId()).collect(Collectors.toList());
+            val proxies = chainedAuthentications.stream().map(authn -> authn.getPrincipal().getId()).collect(Collectors.toList());
             success.setProxies(proxies);
         }
         return success;
     }
-
-
-
-
 
 
 }

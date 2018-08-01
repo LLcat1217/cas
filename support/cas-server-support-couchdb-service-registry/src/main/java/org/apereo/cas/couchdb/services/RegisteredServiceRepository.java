@@ -1,7 +1,7 @@
 package org.apereo.cas.couchdb.services;
 
+import lombok.val;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.ektorp.support.View;
 
@@ -23,6 +23,7 @@ public class RegisteredServiceRepository extends CouchDbRepositorySupport<Regist
 
     /**
      * Implements search by serviceId.
+     *
      * @param serviceId The serviceId of the service to find.
      * @return The service found or +null+.
      */
@@ -33,6 +34,7 @@ public class RegisteredServiceRepository extends CouchDbRepositorySupport<Regist
 
     /**
      * Implements search by service name.
+     *
      * @param serviceName The service name of the service to find.
      * @return The service found or +null+.
      */
@@ -43,6 +45,7 @@ public class RegisteredServiceRepository extends CouchDbRepositorySupport<Regist
 
     /**
      * Overload wrapper for long type. Get service by ID.
+     *
      * @param id Service ID
      * @return service
      */
@@ -52,11 +55,12 @@ public class RegisteredServiceRepository extends CouchDbRepositorySupport<Regist
 
     /**
      * Size of the service database.
+     *
      * @return The service count in the database.
      */
     @View(name = "size", map = "function(doc) {emit(null, doc._id)}", reduce = "function(keys, values, combine) {return values.length}")
     public int size() {
-        final ViewResult r = db.queryView(createQuery("size"));
+        val r = db.queryView(createQuery("size"));
         return r.getRows().get(0).getValueAsInt();
     }
 

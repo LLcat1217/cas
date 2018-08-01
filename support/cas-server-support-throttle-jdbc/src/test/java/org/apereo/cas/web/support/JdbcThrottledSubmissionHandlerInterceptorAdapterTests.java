@@ -1,7 +1,5 @@
 package org.apereo.cas.web.support;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.audit.config.CasSupportJdbcAuditConfiguration;
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
 import org.apereo.cas.authentication.AuthenticationException;
@@ -29,6 +27,9 @@ import org.apereo.cas.config.CasRegisteredServicesTestConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.web.support.config.CasJdbcThrottlingConfiguration;
+
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.junit.runner.RunWith;
@@ -52,7 +53,8 @@ import javax.servlet.http.HttpServletResponse;
  * @since 3.0.0
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CasJdbcThrottlingConfiguration.class,
+@SpringBootTest(classes = {
+    CasJdbcThrottlingConfiguration.class,
     CasCoreAuditConfiguration.class,
     CasCoreConfiguration.class,
     CasCoreAuthenticationServiceSelectionStrategyConfiguration.class,
@@ -76,7 +78,6 @@ import javax.servlet.http.HttpServletResponse;
     CasRegisteredServicesTestConfiguration.class,
     CasWebApplicationServiceFactoryConfiguration.class})
 @TestPropertySource(locations = {"classpath:/casthrottle.properties"})
-@Slf4j
 public class JdbcThrottledSubmissionHandlerInterceptorAdapterTests extends
     AbstractThrottledSubmissionHandlerInterceptorAdapterTests {
 
@@ -84,15 +85,22 @@ public class JdbcThrottledSubmissionHandlerInterceptorAdapterTests extends
     @Qualifier("casAuthenticationManager")
     private AuthenticationManager authenticationManager;
 
+    private static UsernamePasswordCredential badCredentials(final String username) {
+        val credentials = new UsernamePasswordCredential();
+        credentials.setUsername(username);
+        credentials.setPassword("badpassword");
+        return credentials;
+    }
+
     @Override
     protected MockHttpServletResponse loginUnsuccessfully(final String username, final String fromAddress) throws Exception {
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+        val request = new MockHttpServletRequest();
+        val response = new MockHttpServletResponse();
         request.setMethod("POST");
         request.setParameter("username", username);
         request.setRemoteAddr(fromAddress);
         request.setRequestURI("/cas/login");
-        final MockRequestContext context = new MockRequestContext();
+        val context = new MockRequestContext();
         context.setCurrentEvent(new Event(StringUtils.EMPTY, "error"));
         request.setAttribute("flowRequestContext", context);
         ClientInfoHolder.setClientInfo(new ClientInfo(request));
@@ -106,12 +114,5 @@ public class JdbcThrottledSubmissionHandlerInterceptorAdapterTests extends
             return response;
         }
         throw new AssertionError("Expected AbstractAuthenticationException");
-    }
-
-    private static UsernamePasswordCredential badCredentials(final String username) {
-        final UsernamePasswordCredential credentials = new UsernamePasswordCredential();
-        credentials.setUsername(username);
-        credentials.setPassword("badpassword");
-        return credentials;
     }
 }

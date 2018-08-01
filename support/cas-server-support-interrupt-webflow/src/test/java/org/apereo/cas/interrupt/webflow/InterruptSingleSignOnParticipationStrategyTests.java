@@ -2,6 +2,8 @@ package org.apereo.cas.interrupt.webflow;
 
 import org.apereo.cas.interrupt.InterruptResponse;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,17 +23,17 @@ public class InterruptSingleSignOnParticipationStrategyTests {
 
     @Test
     public void verifyStrategyWithoutInterrupt() {
-        final InterruptSingleSignOnParticipationStrategy s =
+        val s =
             new InterruptSingleSignOnParticipationStrategy(mock(ServicesManager.class), true, true);
         assertTrue(s.isParticipating(new MockRequestContext()));
     }
 
     @Test
     public void verifyStrategyWithInterruptDisabled() {
-        final InterruptSingleSignOnParticipationStrategy s =
+        val s =
             new InterruptSingleSignOnParticipationStrategy(mock(ServicesManager.class), true, true);
-        final MockRequestContext ctx = new MockRequestContext();
-        final InterruptResponse response = new InterruptResponse();
+        val ctx = new MockRequestContext();
+        val response = new InterruptResponse();
         response.setSsoEnabled(false);
         InterruptUtils.putInterruptIn(ctx, response);
         assertFalse(s.isParticipating(ctx));

@@ -10,6 +10,8 @@ import org.apereo.cas.config.CasCoreUtilConfiguration;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.web.flow.CasWebflowConstants;
 import org.apereo.cas.web.support.WebUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +23,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.webflow.context.servlet.ServletExternalContext;
-import org.springframework.webflow.execution.Event;
 import org.springframework.webflow.test.MockRequestContext;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -47,19 +47,19 @@ public class InjectResponseHeadersActionTests {
 
     @Test
     public void verifyAction() throws Exception {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
+        val response = new MockHttpServletResponse();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, response));
 
         WebUtils.putAuthentication(CoreAuthenticationTestUtils.getAuthentication(), context);
         WebUtils.putService(context, CoreAuthenticationTestUtils.getWebApplicationService());
 
-        final ResponseBuilderLocator locator = mock(ResponseBuilderLocator.class);
+        val locator = mock(ResponseBuilderLocator.class);
         when(locator.locate(any(WebApplicationService.class))).thenReturn(new WebApplicationServiceResponseBuilder(this.servicesManager));
 
-        final InjectResponseHeadersAction redirectToServiceAction = new InjectResponseHeadersAction(locator);
-        final Event event = redirectToServiceAction.execute(context);
+        val redirectToServiceAction = new InjectResponseHeadersAction(locator);
+        val event = redirectToServiceAction.execute(context);
         assertEquals(CasWebflowConstants.STATE_ID_SUCCESS, event.getId());
         assertNotNull(response.getHeader(CasProtocolConstants.PARAMETER_SERVICE));
     }

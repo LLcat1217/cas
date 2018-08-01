@@ -7,6 +7,8 @@ import org.apereo.cas.config.CasConsentCoreConfiguration;
 import org.apereo.cas.config.CasConsentMongoDbConfiguration;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.junit.ConditionalIgnoreRule;
+
+import lombok.val;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +58,7 @@ public class MongoDbConsentRepositoryTests {
     @Test
     public void verifyAction() {
         assertTrue(consentRepository.findConsentDecisions().isEmpty());
-        final ConsentDecision decision = consentDecisionBuilder.build(CoreAuthenticationTestUtils.getService(),
+        val decision = consentDecisionBuilder.build(CoreAuthenticationTestUtils.getService(),
             CoreAuthenticationTestUtils.getRegisteredService(), "casuser",
             CollectionUtils.wrap("givenName", "CAS"));
         consentRepository.storeConsentDecision(decision);

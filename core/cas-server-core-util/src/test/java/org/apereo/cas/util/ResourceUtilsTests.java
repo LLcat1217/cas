@@ -1,5 +1,6 @@
 package org.apereo.cas.util;
 
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
@@ -27,7 +28,7 @@ public class ResourceUtilsTests {
 
     @Test
     public void verifyResourceOnClasspath() {
-        final ClassPathResource res = new ClassPathResource("valid.json");
+        val res = new ClassPathResource("valid.json");
         assertNotNull(ResourceUtils.prepareClasspathResourceIfNeeded(res, false, "valid"));
         assertNull(ResourceUtils.prepareClasspathResourceIfNeeded(null, false, "valid"));
     }

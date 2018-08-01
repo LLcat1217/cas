@@ -1,10 +1,10 @@
 package org.apereo.cas.consent;
 
 import org.apereo.cas.CipherExecutor;
-import org.apereo.cas.authentication.principal.Service;
-import org.apereo.cas.services.AbstractRegisteredService;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -18,17 +18,17 @@ import static org.junit.Assert.*;
 public class InMemoryConsentRepositoryTests {
     @Test
     public void verifyConsentDecisionStored() {
-        final DefaultConsentDecisionBuilder builder = new DefaultConsentDecisionBuilder(CipherExecutor.noOpOfSerializableToString());
-        final AbstractRegisteredService regSvc = RegisteredServiceTestUtils.getRegisteredService("test");
-        final Service svc = RegisteredServiceTestUtils.getService();
-        final ConsentDecision decision = builder.build(svc,
+        val builder = new DefaultConsentDecisionBuilder(CipherExecutor.noOpOfSerializableToString());
+        val regSvc = RegisteredServiceTestUtils.getRegisteredService("test");
+        val svc = RegisteredServiceTestUtils.getService();
+        val decision = builder.build(svc,
             regSvc, "casuser",
             CollectionUtils.wrap("attribute", "value"));
-        final InMemoryConsentRepository repo = new InMemoryConsentRepository();
+        val repo = new InMemoryConsentRepository();
         assertTrue(repo.storeConsentDecision(decision));
 
         assertTrue(repo.getConsentDecisions().size() == 1);
-        final boolean b = repo.deleteConsentDecision(decision.getId(), "casuser");
+        val b = repo.deleteConsentDecision(decision.getId(), "casuser");
         assertTrue(b);
     }
 }

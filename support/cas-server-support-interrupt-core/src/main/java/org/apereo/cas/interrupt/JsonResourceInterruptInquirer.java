@@ -1,14 +1,15 @@
 package org.apereo.cas.interrupt;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.Authentication;
 import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.util.ResourceUtils;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import lombok.val;
 import org.hjson.JsonValue;
 import org.springframework.core.io.Resource;
 
@@ -24,7 +25,6 @@ import java.util.Map;
  * @author Misagh Moayyed
  * @since 5.2.0
  */
-@Slf4j
 public class JsonResourceInterruptInquirer extends BaseInterruptInquirer {
 
     private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
@@ -39,7 +39,7 @@ public class JsonResourceInterruptInquirer extends BaseInterruptInquirer {
     @Override
     public InterruptResponse inquireInternal(final Authentication authentication, final RegisteredService registeredService,
                                              final Service service, final Credential credential) {
-        final String user = authentication.getPrincipal().getId();
+        val user = authentication.getPrincipal().getId();
         readResourceForInterrupts();
         if (interrupts.containsKey(user)) {
             return interrupts.get(user);
@@ -52,7 +52,7 @@ public class JsonResourceInterruptInquirer extends BaseInterruptInquirer {
         this.interrupts = new LinkedHashMap<>();
         if (ResourceUtils.doesResourceExist(resource)) {
             try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-                final TypeReference<Map<String, InterruptResponse>> personList = new TypeReference<Map<String, InterruptResponse>>() {
+                final TypeReference<Map<String, InterruptResponse>> personList = new TypeReference<>() {
                 };
                 this.interrupts = MAPPER.readValue(JsonValue.readHjson(reader).toString(), personList);
             }

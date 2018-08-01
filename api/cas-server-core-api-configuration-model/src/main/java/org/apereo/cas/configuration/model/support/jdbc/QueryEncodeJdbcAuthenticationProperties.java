@@ -3,11 +3,12 @@ package org.apereo.cas.configuration.model.support.jdbc;
 import org.apereo.cas.configuration.model.core.authentication.PasswordEncoderProperties;
 import org.apereo.cas.configuration.model.core.authentication.PrincipalTransformationProperties;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
-import org.apereo.cas.configuration.support.RequiresModule;
 import org.apereo.cas.configuration.support.RequiredProperty;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.apereo.cas.configuration.support.RequiresModule;
+
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * This is {@link QueryEncodeJdbcAuthenticationProperties}.
@@ -16,7 +17,6 @@ import lombok.Setter;
  * @since 5.2.0
  */
 @RequiresModule(name = "cas-server-support-jdbc-authentication")
-
 @Getter
 @Setter
 public class QueryEncodeJdbcAuthenticationProperties extends AbstractJpaProperties {
@@ -75,7 +75,7 @@ public class QueryEncodeJdbcAuthenticationProperties extends AbstractJpaProperti
     /**
      * Default number of iterations for hashing.
      */
-    private long numberOfIterations;
+    private int numberOfIterations;
 
     /**
      * Static salt to be used for hashing.

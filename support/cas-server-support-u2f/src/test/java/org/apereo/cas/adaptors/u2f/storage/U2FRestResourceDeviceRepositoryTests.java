@@ -1,13 +1,14 @@
 package org.apereo.cas.adaptors.u2f.storage;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yubico.u2f.data.DeviceRegistration;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.U2FConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.MockWebServer;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yubico.u2f.data.DeviceRegistration;
+import lombok.val;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -23,7 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This is {@link U2FRestResourceDeviceRepositoryTests}.
@@ -38,7 +38,6 @@ import java.util.Map;
     RefreshAutoConfiguration.class
 })
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 @TestPropertySource(properties = "cas.authn.mfa.u2f.rest.url=http://localhost:9196")
 public class U2FRestResourceDeviceRepositoryTests extends AbstractU2FDeviceRepositoryTests {
     private static final ObjectMapper MAPPER = new ObjectMapper()
@@ -51,19 +50,14 @@ public class U2FRestResourceDeviceRepositoryTests extends AbstractU2FDeviceRepos
     @Qualifier("u2fDeviceRepository")
     private U2FDeviceRepository u2fDeviceRepository;
 
-    @Override
-    protected U2FDeviceRepository getDeviceRepository() {
-        return this.u2fDeviceRepository;
-    }
-
     @BeforeClass
     public static void beforeClass() throws Exception {
-        final Map<String, List<U2FDeviceRegistration>> devices = new HashMap<>();
-        final DeviceRegistration reg = new DeviceRegistration("123456", "bjsdghj3b", "njsdkhjdfjh45", 1, false);
-        final U2FDeviceRegistration device1 = new U2FDeviceRegistration(2000, "casuser", reg.toJson(), LocalDate.now());
-        final U2FDeviceRegistration device2 = new U2FDeviceRegistration(1000, "casuser", reg.toJson(), LocalDate.now());
+        val devices = new HashMap<String, List<U2FDeviceRegistration>>();
+        val reg = new DeviceRegistration("123456", "bjsdghj3b", "njsdkhjdfjh45", 1, false);
+        val device1 = new U2FDeviceRegistration(2000, "casuser", reg.toJson(), LocalDate.now());
+        val device2 = new U2FDeviceRegistration(1000, "casuser", reg.toJson(), LocalDate.now());
         devices.put(BaseResourceU2FDeviceRepository.MAP_KEY_DEVICES, CollectionUtils.wrapList(device1, device2));
-        final String data = MAPPER.writeValueAsString(devices);
+        val data = MAPPER.writeValueAsString(devices);
         WEB_SERVER = new MockWebServer(9196, data);
         WEB_SERVER.start();
     }
@@ -71,6 +65,11 @@ public class U2FRestResourceDeviceRepositoryTests extends AbstractU2FDeviceRepos
     @AfterClass
     public static void afterClass() {
         WEB_SERVER.close();
+    }
+
+    @Override
+    protected U2FDeviceRepository getDeviceRepository() {
+        return this.u2fDeviceRepository;
     }
 
     @Override

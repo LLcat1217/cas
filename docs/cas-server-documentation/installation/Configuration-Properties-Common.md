@@ -573,7 +573,7 @@ The following options related to MongoDb support in CAS apply equally to a numbe
 # ${configurationKey}.mongo.writeConcern=NORMAL
 # ${configurationKey}.mongo.authenticationDatabaseName=
 # ${configurationKey}.mongo.replicaSet=
-# ${configurationKey}.mongo.ssEnabled=false
+# ${configurationKey}.mongo.sslEnabled=false
 # ${configurationKey}.mongo.conns.lifetime=60000
 # ${configurationKey}.mongo.conns.perHost=10
 ```
@@ -631,7 +631,6 @@ The following options related to Redis support in CAS apply equally to a number 
 # ${configurationKey}.redis.password=
 # ${configurationKey}.redis.timeout=2000
 # ${configurationKey}.redis.useSsl=false
-# ${configurationKey}.redis.usePool=true
 
 # ${configurationKey}.redis.pool.max-active=20
 # ${configurationKey}.redis.pool.maxIdle=8
@@ -850,6 +849,7 @@ def List<MessageDescriptor> run(final Object... args) {
     def response = args[0]
     def configuration = args[1];
     def logger = args[2]
+    def applicationContext = args[3]
 
     logger.info("Handling password policy [{}] via ${configuration.getAccountStateHandler()}", response)
 
@@ -908,7 +908,7 @@ topic, [please review this guide](SMS-Messaging-Configuration.html).
  
 ## Delegated Authentication Settings
 
-The following  options are shared and apply when CAS is configured to delegate authentication 
+The following options are shared and apply when CAS is configured to delegate authentication 
 to an external provider such as Yahoo, given the provider's *configuration key*:
 
 ```properties
@@ -918,6 +918,20 @@ to an external provider such as Yahoo, given the provider's *configuration key*:
 # ${configurationKey}.autoRedirect=false
 ```
 
+### Delegated Authentication OpenID Connect Settings
+
+The following options are shared and apply when CAS is configured to delegate authentication 
+to an external OpenID Connect provider such as Azure AD, given the provider's *configuration key*:
+
+```properties
+# ${configurationKey}.discoveryUri=
+# ${configurationKey}.logoutUrl=
+# ${configurationKey}.maxClockSkew=
+# ${configurationKey}.scope=
+# ${configurationKey}.useNonce=
+# ${configurationKey}.preferredJwsAlgorithm=
+# ${configurationKey}.customParams.param1=value1
+```
 
 ## LDAP Connection Settings
 

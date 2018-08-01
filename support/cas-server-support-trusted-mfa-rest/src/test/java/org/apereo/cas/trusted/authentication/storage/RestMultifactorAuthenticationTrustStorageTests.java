@@ -1,9 +1,5 @@
 package org.apereo.cas.trusted.authentication.storage;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustRecord;
 import org.apereo.cas.trusted.authentication.api.MultifactorAuthenticationTrustStorage;
@@ -12,6 +8,11 @@ import org.apereo.cas.trusted.config.MultifactorAuthnTrustedDeviceFingerprintCon
 import org.apereo.cas.trusted.config.RestMultifactorAuthenticationTrustConfiguration;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.MockWebServer;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.val;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -43,7 +43,6 @@ import static org.junit.Assert.*;
     MultifactorAuthnTrustConfiguration.class,
     CasCoreAuditConfiguration.class,
     RefreshAutoConfiguration.class})
-@Slf4j
 @TestPropertySource(properties = "cas.authn.mfa.trusted.rest.url=http://localhost:9297")
 public class RestMultifactorAuthenticationTrustStorageTests {
     private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
@@ -60,15 +59,15 @@ public class RestMultifactorAuthenticationTrustStorageTests {
 
     @Test
     public void verifySetAnExpireByKey() throws Exception {
-        final MultifactorAuthenticationTrustRecord r =
+        val r =
             MultifactorAuthenticationTrustRecord.newInstance("casuser", "geography", "fingerprint");
-        final String data = MAPPER.writeValueAsString(CollectionUtils.wrap(r));
-        try (MockWebServer webServer = new MockWebServer(9297,
+        val data = MAPPER.writeValueAsString(CollectionUtils.wrap(r));
+        try (val webServer = new MockWebServer(9297,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
 
             mfaTrustEngine.set(r);
-            final Set<MultifactorAuthenticationTrustRecord> records = mfaTrustEngine.get("casuser");
+            val records = mfaTrustEngine.get("casuser");
             assertNotNull(records);
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
@@ -77,16 +76,16 @@ public class RestMultifactorAuthenticationTrustStorageTests {
 
     @Test
     public void verifyExpireByDate() throws Exception {
-        final MultifactorAuthenticationTrustRecord r =
+        val r =
             MultifactorAuthenticationTrustRecord.newInstance("castest", "geography", "fingerprint");
         r.setRecordDate(LocalDateTime.now().minusDays(2));
 
-        final String data = MAPPER.writeValueAsString(CollectionUtils.wrap(r));
-        try (MockWebServer webServer = new MockWebServer(9297,
+        val data = MAPPER.writeValueAsString(CollectionUtils.wrap(r));
+        try (val webServer = new MockWebServer(9297,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
             mfaTrustEngine.set(r);
-            final Set<MultifactorAuthenticationTrustRecord> records = mfaTrustEngine.get(r.getPrincipal());
+            val records = mfaTrustEngine.get(r.getPrincipal());
             assertNotNull(records);
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);

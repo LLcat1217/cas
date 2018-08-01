@@ -1,15 +1,15 @@
 package org.apereo.cas.adaptors.gauth.repository.credentials;
 
+import org.apereo.cas.CipherExecutor;
+import org.apereo.cas.config.CasCoreUtilConfiguration;
+import org.apereo.cas.configuration.model.support.mfa.GoogleAuthenticatorMultifactorProperties;
+import org.apereo.cas.util.MockWebServer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
 import com.warrenstrange.googleauth.IGoogleAuthenticator;
-import lombok.extern.slf4j.Slf4j;
-import org.apereo.cas.CipherExecutor;
-import org.apereo.cas.config.CasCoreUtilConfiguration;
-import org.apereo.cas.configuration.model.support.mfa.GAuthMultifactorProperties;
-import org.apereo.cas.authentication.OneTimeTokenAccount;
-import org.apereo.cas.util.MockWebServer;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,41 +37,40 @@ import static org.junit.Assert.*;
     RefreshAutoConfiguration.class,
     CasCoreUtilConfiguration.class
 })
-@Slf4j
 public class RestGoogleAuthenticatorTokenCredentialRepositoryTests {
     private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
 
     private IGoogleAuthenticator google;
 
     @Before
-    public void setup() {
-        final GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
+    public void initialize() {
+        val bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
         this.google = new GoogleAuthenticator(bldr.build());
     }
 
     @Test
     public void verifyCreate() {
-        final GAuthMultifactorProperties gauth = new GAuthMultifactorProperties();
-        final RestGoogleAuthenticatorTokenCredentialRepository repo =
+        val gauth = new GoogleAuthenticatorMultifactorProperties();
+        val repo =
             new RestGoogleAuthenticatorTokenCredentialRepository(google, new RestTemplate(),
                 gauth,
                 CipherExecutor.noOpOfStringToString());
-        final OneTimeTokenAccount acct = repo.create("casuser");
+        val acct = repo.create("casuser");
         assertNotNull(acct);
     }
 
     @Test
     public void verifyGet() throws Exception {
-        final GAuthMultifactorProperties gauth = new GAuthMultifactorProperties();
+        val gauth = new GoogleAuthenticatorMultifactorProperties();
         gauth.getRest().setEndpointUrl("http://localhost:9295");
-        final RestGoogleAuthenticatorTokenCredentialRepository repo =
+        val repo =
             new RestGoogleAuthenticatorTokenCredentialRepository(google, new RestTemplate(),
                 gauth,
                 CipherExecutor.noOpOfStringToString());
-        OneTimeTokenAccount acct = repo.create("casuser");
+        var acct = repo.create("casuser");
 
-        final String data = MAPPER.writeValueAsString(acct);
-        try (MockWebServer webServer = new MockWebServer(9295,
+        val data = MAPPER.writeValueAsString(acct);
+        try (val webServer = new MockWebServer(9295,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
             repo.save(acct.getUsername(), acct.getSecretKey(), acct.getValidationCode(), acct.getScratchCodes());
@@ -80,7 +79,5 @@ public class RestGoogleAuthenticatorTokenCredentialRepositoryTests {
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
         }
-
-
     }
 }

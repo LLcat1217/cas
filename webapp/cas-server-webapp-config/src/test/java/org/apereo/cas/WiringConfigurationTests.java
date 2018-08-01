@@ -1,8 +1,6 @@
 package org.apereo.cas;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
-import org.apereo.cas.config.CasApplicationContextConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationMetadataConfiguration;
@@ -21,7 +19,6 @@ import org.apereo.cas.config.CasCoreWebConfiguration;
 import org.apereo.cas.config.CasFiltersConfiguration;
 import org.apereo.cas.config.CasPersonDirectoryConfiguration;
 import org.apereo.cas.config.CasPropertiesConfiguration;
-import org.apereo.cas.config.CasSecurityContextConfiguration;
 import org.apereo.cas.config.CasWebAppConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
@@ -32,6 +29,7 @@ import org.apereo.cas.validation.config.CasCoreValidationConfiguration;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +54,8 @@ import static org.junit.Assert.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
-    CasApplicationContextConfiguration.class,
     CasFiltersConfiguration.class,
     CasPropertiesConfiguration.class,
-    CasSecurityContextConfiguration.class,
     CasWebAppConfiguration.class,
     CasCoreWebflowConfiguration.class,
     CasWebflowContextConfiguration.class,
@@ -94,14 +90,14 @@ import static org.junit.Assert.*;
 @WebAppConfiguration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @TestPropertySource(properties = "spring.aop.proxy-target-class=true")
-@Slf4j
 public class WiringConfigurationTests {
+
     @Autowired
     private ApplicationContext applicationContext;
 
     @Test
     public void verifyConfigurationClasses() {
-        assertNotNull(this.applicationContext);
-        assertTrue(this.applicationContext.getBeanDefinitionCount() > 0);
+        assertNotNull(applicationContext);
+        assertTrue(applicationContext.getBeanDefinitionCount() > 0);
     }
 }

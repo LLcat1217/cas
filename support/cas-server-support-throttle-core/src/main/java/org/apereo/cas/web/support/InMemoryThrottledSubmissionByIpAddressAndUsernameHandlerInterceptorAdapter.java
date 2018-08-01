@@ -1,8 +1,9 @@
 package org.apereo.cas.web.support;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
+
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,9 +15,8 @@ import javax.servlet.http.HttpServletRequest;
  * @author Scott Battaglia
  * @since 3.3.5
  */
-@Slf4j
 public class InMemoryThrottledSubmissionByIpAddressAndUsernameHandlerInterceptorAdapter
-        extends AbstractInMemoryThrottledSubmissionHandlerInterceptorAdapter {
+    extends AbstractInMemoryThrottledSubmissionHandlerInterceptorAdapter {
 
     public InMemoryThrottledSubmissionByIpAddressAndUsernameHandlerInterceptorAdapter(final int failureThreshold,
                                                                                       final int failureRangeInSeconds,
@@ -30,7 +30,7 @@ public class InMemoryThrottledSubmissionByIpAddressAndUsernameHandlerInterceptor
 
     @Override
     public String constructKey(final HttpServletRequest request) {
-        final String username = request.getParameter(getUsernameParameter());
+        val username = request.getParameter(getUsernameParameter());
 
         if (StringUtils.isBlank(username)) {
             return request.getRemoteAddr();

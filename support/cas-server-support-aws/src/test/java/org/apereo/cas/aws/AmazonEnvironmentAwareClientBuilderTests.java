@@ -1,6 +1,7 @@
 package org.apereo.cas.aws;
 
 import com.amazonaws.client.builder.AwsClientBuilder;
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,10 @@ public class AmazonEnvironmentAwareClientBuilderTests {
 
     @Test
     public void verifyAction() {
-        final AmazonEnvironmentAwareClientBuilder builder = new AmazonEnvironmentAwareClientBuilder("aws", environment);
-        final AwsClientBuilder mock = mock(AwsClientBuilder.class);
+        val builder = new AmazonEnvironmentAwareClientBuilder("aws", environment);
+        val mock = mock(AwsClientBuilder.class);
         when(mock.build()).thenReturn(new Object());
-        final Object client = builder.build(mock, Object.class);
+        val client = builder.build(mock, Object.class);
         assertNotNull(client);
         assertNotNull(builder.getSetting("secretKey"));
         assertNotNull(builder.getSetting("secretKey", String.class));

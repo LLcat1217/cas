@@ -1,6 +1,5 @@
 package org.apereo.cas.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.CentralAuthenticationService;
 import org.apereo.cas.authentication.AuthenticationAttributeReleasePolicy;
 import org.apereo.cas.authentication.AuthenticationContextValidator;
@@ -9,7 +8,6 @@ import org.apereo.cas.authentication.MultifactorTriggerSelectionStrategy;
 import org.apereo.cas.authentication.ProtocolAttributeEncoder;
 import org.apereo.cas.authentication.principal.ResponseBuilder;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.saml.SamlCoreProperties;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.authentication.principal.SamlServiceResponseBuilder;
@@ -21,6 +19,8 @@ import org.apereo.cas.ticket.proxy.ProxyHandler;
 import org.apereo.cas.validation.CasProtocolValidationSpecification;
 import org.apereo.cas.validation.ServiceTicketValidationAuthorizersExecutionPlan;
 import org.apereo.cas.web.support.ArgumentExtractor;
+
+import lombok.val;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,7 +41,6 @@ import java.nio.charset.StandardCharsets;
  */
 @Configuration("samlConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class SamlConfiguration {
 
     @Autowired
@@ -103,7 +102,7 @@ public class SamlConfiguration {
     @RefreshScope
     @Bean
     public View casSamlServiceSuccessView() {
-        final SamlCoreProperties samlCore = casProperties.getSamlCore();
+        val samlCore = casProperties.getSamlCore();
         return new Saml10SuccessResponseView(protocolAttributeEncoder,
             servicesManager,
             casProperties.getAuthn().getMfa().getAuthenticationContextAttribute(),

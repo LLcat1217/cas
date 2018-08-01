@@ -1,12 +1,12 @@
 package org.apereo.cas.web.support.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.throttle.ThrottleProperties;
 import org.apereo.cas.configuration.support.JpaBeans;
 import org.apereo.cas.web.support.JdbcThrottledSubmissionHandlerInterceptorAdapter;
 import org.apereo.cas.web.support.ThrottledSubmissionHandlerInterceptor;
+
+import lombok.val;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,7 +25,6 @@ import javax.sql.DataSource;
  */
 @Configuration("casJdbcThrottlingConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class CasJdbcThrottlingConfiguration {
 
     @Autowired
@@ -44,8 +43,8 @@ public class CasJdbcThrottlingConfiguration {
     @Bean
     @RefreshScope
     public ThrottledSubmissionHandlerInterceptor authenticationThrottle() {
-        final ThrottleProperties throttle = casProperties.getAuthn().getThrottle();
-        final ThrottleProperties.Failure failure = throttle.getFailure();
+        val throttle = casProperties.getAuthn().getThrottle();
+        val failure = throttle.getFailure();
         return new JdbcThrottledSubmissionHandlerInterceptorAdapter(failure.getThreshold(),
             failure.getRangeSeconds(),
             throttle.getUsernameParameter(),

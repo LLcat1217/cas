@@ -7,6 +7,8 @@ import org.apereo.cas.config.CasCoreWebConfiguration;
 import org.apereo.cas.config.CasSupportMongoDbAuditConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.util.DateTimeUtils;
+
+import lombok.val;
 import org.apereo.inspektr.audit.AuditActionContext;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -21,9 +23,6 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 
 import static org.junit.Assert.*;
 
@@ -43,7 +42,6 @@ import static org.junit.Assert.*;
         CasCoreWebConfiguration.class})
 @TestPropertySource(locations = {"classpath:/mongoaudit.properties"})
 @Category(MongoDbCategory.class)
-@Slf4j
 public class MongoDbAuditTrailManagerTests {
 
     @ClassRule
@@ -58,13 +56,14 @@ public class MongoDbAuditTrailManagerTests {
 
     @Test
     public void verify() {
-        final Date since = DateTimeUtils.dateOf(LocalDate.now().minusDays(2));
-        final AuditActionContext ctx = new AuditActionContext("casuser", "resource",
+        val twoDaysAgo = LocalDate.now().minusDays(2);
+        val since = DateTimeUtils.dateOf(twoDaysAgo);
+        val ctx = new AuditActionContext("casuser", "resource",
             "action", "appcode", since, "clientIp",
             "serverIp");
         auditTrailExecutionPlan.record(ctx);
 
-        final Set results = auditTrailExecutionPlan.getAuditRecordsSince(LocalDate.now());
+        val results = auditTrailExecutionPlan.getAuditRecordsSince(twoDaysAgo);
         assertFalse(results.isEmpty());
     }
 }

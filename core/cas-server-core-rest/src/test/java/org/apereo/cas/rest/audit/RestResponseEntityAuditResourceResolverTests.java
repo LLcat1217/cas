@@ -2,12 +2,13 @@ package org.apereo.cas.rest.audit;
 
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.MockWebServer;
+
+import lombok.val;
 import org.aspectj.lang.JoinPoint;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -21,13 +22,13 @@ import static org.mockito.Mockito.*;
 public class RestResponseEntityAuditResourceResolverTests {
     @Test
     public void verifyAction() {
-        final RestResponseEntityAuditResourceResolver r = new RestResponseEntityAuditResourceResolver(true);
-        try (MockWebServer webServer = new MockWebServer(9193)) {
+        val r = new RestResponseEntityAuditResourceResolver(true);
+        try (val webServer = new MockWebServer(9193)) {
             webServer.start();
-            final MultiValueMap headers = new LinkedMultiValueMap();
+            val headers = new LinkedMultiValueMap();
             headers.put("header", CollectionUtils.wrapList("value"));
             headers.put("location", CollectionUtils.wrapList("someplace"));
-            final ResponseEntity entity = new ResponseEntity("The Response Body", headers, HttpStatus.OK);
+            val entity = new ResponseEntity("The Response Body", headers, HttpStatus.OK);
             assertTrue(r.resolveFrom(mock(JoinPoint.class), entity).length > 0);
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);

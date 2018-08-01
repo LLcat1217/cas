@@ -1,8 +1,5 @@
 package org.apereo.cas.adaptors.fortress.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.directory.fortress.core.AccessMgr;
-import org.apache.directory.fortress.core.rest.AccessMgrRestImpl;
 import org.apereo.cas.adaptors.fortress.FortressAuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationHandler;
@@ -10,6 +7,11 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.directory.fortress.core.AccessMgr;
+import org.apache.directory.fortress.core.rest.AccessMgrRestImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @Slf4j
 public class FortressAuthenticationConfiguration {
-    
+
     @Autowired
     private CasConfigurationProperties casProperties;
 
@@ -45,9 +47,9 @@ public class FortressAuthenticationConfiguration {
 
     @Bean
     public AccessMgr fortressAccessManager() {
-        final String rbacContext = casProperties.getAuthn().getFortress().getRbaccontext();
+        val rbacContext = casProperties.getAuthn().getFortress().getRbaccontext();
         LOGGER.trace("Registering fortress access manager with context: [{}]", rbacContext);
-        final AccessMgrRestImpl accessMgrRestImpl = new AccessMgrRestImpl();
+        val accessMgrRestImpl = new AccessMgrRestImpl();
         accessMgrRestImpl.setContextId(casProperties.getAuthn().getFortress().getRbaccontext());
         return accessMgrRestImpl;
     }
@@ -57,7 +59,7 @@ public class FortressAuthenticationConfiguration {
     @RefreshScope
     public AuthenticationHandler fortressAuthenticationHandler() {
         return new FortressAuthenticationHandler(fortressAccessManager(), null,
-                servicesManager, fortressPrincipalFactory(), null);
+            servicesManager, fortressPrincipalFactory(), null);
     }
 
     @ConditionalOnMissingBean(name = "fortressAuthenticationEventExecutionPlanConfigurer")

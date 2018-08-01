@@ -30,11 +30,13 @@ import org.apereo.cas.rest.factory.ServiceTicketResourceEntityResponseFactory;
 import org.apereo.cas.rest.factory.TicketGrantingTicketResourceEntityResponseFactory;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.util.CollectionUtils;
+
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.validation.AbstractUrlBasedTicketValidator;
 import org.jasig.cas.client.validation.Assertion;
 import org.jasig.cas.client.validation.AssertionImpl;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,7 +45,6 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.annotation.PostConstruct;
 import java.net.URL;
 import java.util.List;
 
@@ -103,15 +104,19 @@ public abstract class BaseTicketResourceEntityResponseFactoryTests {
     protected ServiceTicketResourceEntityResponseFactory serviceTicketResourceEntityResponseFactory;
 
     @TestConfiguration
-    public static class TicketResourceTestConfiguration {
+    public static class TicketResourceTestConfiguration implements InitializingBean {
 
         @Autowired
         @Qualifier("inMemoryRegisteredServices")
         private List inMemoryRegisteredServices;
 
-        @PostConstruct
         public void init() {
             inMemoryRegisteredServices.add(RegisteredServiceTestUtils.getRegisteredService("https://cas.example.org.+"));
+        }
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            init();
         }
 
         @Bean

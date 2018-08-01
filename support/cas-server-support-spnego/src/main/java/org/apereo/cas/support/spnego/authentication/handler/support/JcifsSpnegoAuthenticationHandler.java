@@ -1,9 +1,5 @@
 package org.apereo.cas.support.spnego.authentication.handler.support;
 
-import com.google.common.base.Splitter;
-import jcifs.spnego.Authentication;
-import lombok.Synchronized;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.BasicCredentialMetaData;
 import org.apereo.cas.authentication.Credential;
@@ -14,13 +10,17 @@ import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.spnego.authentication.principal.SpnegoCredential;
 
+import com.google.common.base.Splitter;
+import jcifs.spnego.Authentication;
+import lombok.Setter;
+import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.security.auth.login.FailedLoginException;
 import java.security.GeneralSecurityException;
-import java.util.List;
 import java.util.regex.Pattern;
-
-import lombok.Setter;
 
 /**
  * Implementation of an AuthenticationHandler for SPNEGO supports. This Handler
@@ -55,7 +55,7 @@ public class JcifsSpnegoAuthenticationHandler extends AbstractPreAndPostProcessi
     @Override
     @Synchronized
     protected AuthenticationHandlerExecutionResult doAuthentication(final Credential credential) throws GeneralSecurityException {
-        final SpnegoCredential spnegoCredential = (SpnegoCredential) credential;
+        val spnegoCredential = (SpnegoCredential) credential;
         final java.security.Principal principal;
         final byte[] nextToken;
         if (!this.ntlmAllowed && spnegoCredential.isNtlm()) {
@@ -79,7 +79,7 @@ public class JcifsSpnegoAuthenticationHandler extends AbstractPreAndPostProcessi
         } else {
             LOGGER.debug("nextToken is null");
         }
-        boolean success = false;
+        var success = false;
         if (principal != null) {
             if (spnegoCredential.isNtlm()) {
                 LOGGER.debug("NTLM Credential is valid for user [{}]", principal.getName());
@@ -114,14 +114,14 @@ public class JcifsSpnegoAuthenticationHandler extends AbstractPreAndPostProcessi
         }
         if (isNtlm) {
             if (Pattern.matches("\\S+\\\\\\S+", name)) {
-                final List<String> splitList = Splitter.on(Pattern.compile("\\\\")).splitToList(name);
+                val splitList = Splitter.on(Pattern.compile("\\\\")).splitToList(name);
                 if (splitList.size() == 2) {
                     return this.principalFactory.createPrincipal(splitList.get(1));
                 }
             }
             return this.principalFactory.createPrincipal(name);
         }
-        final List<String> splitList = Splitter.on("@").splitToList(name);
+        val splitList = Splitter.on("@").splitToList(name);
         return this.principalFactory.createPrincipal(splitList.get(0));
     }
 }

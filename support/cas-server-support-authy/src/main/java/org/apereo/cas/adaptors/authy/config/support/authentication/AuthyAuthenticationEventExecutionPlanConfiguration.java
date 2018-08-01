@@ -1,8 +1,5 @@
 package org.apereo.cas.adaptors.authy.config.support.authentication;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.adaptors.authy.AuthyAuthenticationHandler;
 import org.apereo.cas.adaptors.authy.AuthyClientInstance;
 import org.apereo.cas.adaptors.authy.AuthyMultifactorAuthenticationProvider;
@@ -18,9 +15,12 @@ import org.apereo.cas.authentication.metadata.AuthenticationContextAttributeMeta
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.mfa.AuthyMultifactorProperties;
 import org.apereo.cas.services.MultifactorAuthenticationProvider;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,7 +39,6 @@ import org.springframework.webflow.execution.Action;
  */
 @Configuration("authyAuthenticationEventExecutionPlanConfiguration")
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class AuthyAuthenticationEventExecutionPlanConfiguration {
 
     @Autowired
@@ -52,7 +51,7 @@ public class AuthyAuthenticationEventExecutionPlanConfiguration {
     @RefreshScope
     @Bean
     public AuthyClientInstance authyClientInstance() {
-        final AuthyMultifactorProperties authy = casProperties.getAuthn().getMfa().getAuthy();
+        val authy = casProperties.getAuthn().getMfa().getAuthy();
         if (StringUtils.isBlank(authy.getApiKey())) {
             throw new IllegalArgumentException("Authy API key must be defined");
         }
@@ -65,8 +64,8 @@ public class AuthyAuthenticationEventExecutionPlanConfiguration {
     @Bean
     @SneakyThrows
     public AuthenticationHandler authyAuthenticationHandler() {
-        final AuthyMultifactorProperties authy = casProperties.getAuthn().getMfa().getAuthy();
-        final boolean forceVerification = authy.isForceVerification();
+        val authy = casProperties.getAuthn().getMfa().getAuthy();
+        val forceVerification = authy.isForceVerification();
         return new AuthyAuthenticationHandler(authy.getName(), servicesManager, authyPrincipalFactory(), authyClientInstance(), forceVerification);
     }
 
@@ -79,7 +78,7 @@ public class AuthyAuthenticationEventExecutionPlanConfiguration {
     @Bean
     @RefreshScope
     public MultifactorAuthenticationProvider authyAuthenticatorAuthenticationProvider() {
-        final AuthyMultifactorAuthenticationProvider p = new AuthyMultifactorAuthenticationProvider();
+        val p = new AuthyMultifactorAuthenticationProvider();
         p.setBypassEvaluator(authyBypassEvaluator());
         p.setGlobalFailureMode(casProperties.getAuthn().getMfa().getGlobalFailureMode());
         p.setOrder(casProperties.getAuthn().getMfa().getAuthy().getRank());

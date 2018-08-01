@@ -6,7 +6,9 @@ import org.apereo.cas.config.CoreSamlConfiguration;
 import org.apereo.cas.configuration.model.support.saml.idp.SamlIdPProperties;
 import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
-import org.apereo.cas.util.http.SimpleHttpClient;
+
+import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,11 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-
-import java.util.Collection;
-import lombok.extern.slf4j.Slf4j;
 
 import static org.junit.Assert.*;
 
@@ -29,13 +30,13 @@ import static org.junit.Assert.*;
  * @author Misagh Moayyed
  * @since 5.3.0
  */
-@Slf4j
 @SpringBootTest(classes = {
     RefreshAutoConfiguration.class,
     CasCoreHttpConfiguration.class,
     CoreSamlConfiguration.class
 })
 @Category(FileSystemCategory.class)
+@TestPropertySource(properties = {"cas.authn.samlIdp.metadata.location=file:/tmp"})
 public class UrlResourceMetadataResolverTests {
 
     @ClassRule
@@ -45,18 +46,15 @@ public class UrlResourceMetadataResolverTests {
     public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
     @Autowired
-    @Qualifier("httpClient")
-    private SimpleHttpClient httpClient;
-
-    @Autowired
     @Qualifier("shibboleth.OpenSAMLConfig")
     private OpenSamlConfigBean openSamlConfigBean;
 
     @Test
     public void verifyResolverSupports() {
-        final SamlIdPProperties props = new SamlIdPProperties();
-        final UrlResourceMetadataResolver resolver = new UrlResourceMetadataResolver(props, openSamlConfigBean);
-        final SamlRegisteredService service = new SamlRegisteredService();
+        val props = new SamlIdPProperties();
+        props.getMetadata().setLocation(new FileSystemResource(FileUtils.getTempDirectory()));
+        val resolver = new UrlResourceMetadataResolver(props, openSamlConfigBean);
+        val service = new SamlRegisteredService();
         service.setMetadataLocation("http://www.testshib.org/metadata/testshib-providers.xml");
         assertTrue(resolver.supports(service));
         service.setMetadataLocation("classpath:sample-sp.xml");
@@ -65,13 +63,14 @@ public class UrlResourceMetadataResolverTests {
 
     @Test
     public void verifyResolverResolves() {
-        final SamlIdPProperties props = new SamlIdPProperties();
-        final UrlResourceMetadataResolver resolver = new UrlResourceMetadataResolver(props, openSamlConfigBean);
-        final SamlRegisteredService service = new SamlRegisteredService();
+        val props = new SamlIdPProperties();
+        props.getMetadata().setLocation(new FileSystemResource(FileUtils.getTempDirectory()));
+        val service = new SamlRegisteredService();
+        val resolver = new UrlResourceMetadataResolver(props, openSamlConfigBean);
         service.setName("TestShib");
         service.setId(1000);
         service.setMetadataLocation("http://www.testshib.org/metadata/testshib-providers.xml");
-        final Collection results = resolver.resolve(service);
+        val results = resolver.resolve(service);
         assertFalse(results.isEmpty());
     }
 }

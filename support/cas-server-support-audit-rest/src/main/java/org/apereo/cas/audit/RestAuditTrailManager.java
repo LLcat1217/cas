@@ -1,5 +1,10 @@
 package org.apereo.cas.audit;
 
+import org.apereo.cas.audit.spi.AuditActionContextJsonSerializer;
+import org.apereo.cas.configuration.model.core.audit.AuditRestProperties;
+import org.apereo.cas.util.CollectionUtils;
+import org.apereo.cas.util.HttpUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,12 +13,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apereo.cas.configuration.model.core.audit.AuditRestProperties;
-import org.apereo.cas.util.CollectionUtils;
-import org.apereo.cas.util.HttpUtils;
 import org.apereo.inspektr.audit.AuditActionContext;
 import org.apereo.inspektr.audit.AuditTrailManager;
 
@@ -39,17 +41,15 @@ public class RestAuditTrailManager implements AuditTrailManager {
         .registerModule(new SimpleModule().setMixInAnnotation(AuditActionContext.class, AbstractAuditActionContextMixin.class));
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-    @Setter
-    private boolean asynchronous = true;
-
     private final AuditActionContextJsonSerializer serializer = new AuditActionContextJsonSerializer();
     private final AuditRestProperties properties;
+    @Setter
+    private boolean asynchronous = true;
 
     @Override
     public void record(final AuditActionContext audit) {
         final Runnable task = () -> {
-            final String auditJson = serializer.toString(audit);
+            val auditJson = serializer.toString(audit);
             LOGGER.debug("Sending audit action context to REST endpoint [{}]", properties.getUrl());
             HttpUtils.executePost(properties.getUrl(), properties.getBasicAuthUsername(), properties.getBasicAuthPassword(), auditJson);
         };
@@ -65,11 +65,11 @@ public class RestAuditTrailManager implements AuditTrailManager {
     public Set<AuditActionContext> getAuditRecordsSince(final LocalDate localDate) {
         try {
             LOGGER.debug("Sending query to audit REST endpoint to fetch records from [{}]", localDate);
-            final HttpResponse response = HttpUtils.executeGet(properties.getUrl(), properties.getBasicAuthUsername(),
+            val response = HttpUtils.executeGet(properties.getUrl(), properties.getBasicAuthUsername(),
                 properties.getBasicAuthPassword(), CollectionUtils.wrap("date", String.valueOf(localDate.toEpochDay())));
             if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                final String result = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-                final TypeReference<Set<AuditActionContext>> values = new TypeReference<Set<AuditActionContext>>() {
+                val result = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+                final TypeReference<Set<AuditActionContext>> values = new TypeReference<>() {
                 };
                 return MAPPER.readValue(result, values);
             }

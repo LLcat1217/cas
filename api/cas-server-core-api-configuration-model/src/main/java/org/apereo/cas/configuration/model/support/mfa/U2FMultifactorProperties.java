@@ -7,10 +7,12 @@ import org.apereo.cas.configuration.model.support.quartz.ScheduledJobProperties;
 import org.apereo.cas.configuration.support.RequiresModule;
 import org.apereo.cas.configuration.support.RestEndpointProperties;
 import org.apereo.cas.configuration.support.SpringResourceProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import java.util.concurrent.TimeUnit;
+
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is {@link U2FMultifactorProperties}.
@@ -19,7 +21,6 @@ import lombok.Setter;
  * @since 5.2.0
  */
 @RequiresModule(name = "cas-server-support-u2f")
-
 @Getter
 @Setter
 public class U2FMultifactorProperties extends BaseMultifactorProviderProperties {
@@ -75,6 +76,11 @@ public class U2FMultifactorProperties extends BaseMultifactorProviderProperties 
      * Store device registration records via REST APIs.
      */
     private Rest rest = new Rest();
+
+    /**
+     * Indicates whether this provider should support trusted devices.
+     */
+    private boolean trustedDeviceEnabled;
 
     /**
      * Clean up expired records via a background cleaner process.

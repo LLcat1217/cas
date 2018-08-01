@@ -1,9 +1,11 @@
 package org.apereo.cas.web.flow;
 
-import jcifs.spnego.Authentication;
 import org.apereo.cas.support.spnego.MockJcifsAuthentication;
 import org.apereo.cas.support.spnego.util.SpnegoConstants;
 import org.apereo.cas.util.EncodingUtils;
+
+import jcifs.spnego.Authentication;
+import lombok.val;
 import org.junit.Test;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +28,11 @@ import static org.junit.Assert.*;
 public class SpnegoCredentialsActionTests extends AbstractSpnegoTests {
     @Test
     public void verifyOperation() throws Exception {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         request.addHeader(SpnegoConstants.HEADER_AUTHORIZATION, SpnegoConstants.NEGOTIATE
-            + " " + EncodingUtils.encodeBase64("credential"));
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+            + ' ' + EncodingUtils.encodeBase64("credential"));
+        val response = new MockHttpServletResponse();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, response));
         spnegoAction.execute(context);
         assertNotNull(response.getHeader(SpnegoConstants.HEADER_AUTHENTICATE));

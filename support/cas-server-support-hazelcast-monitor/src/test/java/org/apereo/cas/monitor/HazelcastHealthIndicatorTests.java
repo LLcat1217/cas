@@ -1,6 +1,5 @@
 package org.apereo.cas.monitor;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationMetadataConfiguration;
@@ -23,11 +22,12 @@ import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguratio
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.monitor.config.HazelcastMonitorConfiguration;
 import org.apereo.cas.util.junit.ConditionalSpringRunner;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +71,6 @@ import static org.junit.Assert.*;
     HazelcastMonitorConfiguration.class
 })
 @TestPropertySource(properties = {"cas.ticket.registry.hazelcast.cluster.instanceName=testlocalmonitor"})
-@Slf4j
 public class HazelcastHealthIndicatorTests {
     @Autowired
     @Qualifier("hazelcastHealthIndicator")
@@ -79,9 +78,9 @@ public class HazelcastHealthIndicatorTests {
 
     @Test
     public void verifyMonitor() {
-        final Health health = hazelcastHealthIndicator.health();
+        val health = hazelcastHealthIndicator.health();
         assertEquals(Status.UP, health.getStatus());
-        final Map<String, Object> details = health.getDetails();
+        val details = health.getDetails();
         details.values().stream()
             .map(Map.class::cast)
             .forEach(map -> {

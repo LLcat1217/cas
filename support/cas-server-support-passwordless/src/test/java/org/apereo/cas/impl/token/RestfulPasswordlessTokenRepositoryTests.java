@@ -1,6 +1,5 @@
 package org.apereo.cas.impl.token;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.CipherExecutor;
 import org.apereo.cas.api.PasswordlessTokenRepository;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
@@ -27,6 +26,9 @@ import org.apereo.cas.util.MockWebServer;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -89,12 +90,12 @@ public class RestfulPasswordlessTokenRepositoryTests {
 
     @Test
     public void verifyFindToken() {
-        final String token = passwordlessTokenRepository.createToken("casuser");
-        final String data = passwordlessCipherExecutor.encode(token).toString();
-        try (MockWebServer webServer = new MockWebServer(9293,
+        val token = passwordlessTokenRepository.createToken("casuser");
+        val data = passwordlessCipherExecutor.encode(token).toString();
+        try (val webServer = new MockWebServer(9293,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
-            final Optional<String> foundToken = passwordlessTokenRepository.findToken("casuser");
+            val foundToken = passwordlessTokenRepository.findToken("casuser");
             assertNotNull(foundToken);
             assertTrue(foundToken.isPresent());
         } catch (final Exception e) {
@@ -104,8 +105,8 @@ public class RestfulPasswordlessTokenRepositoryTests {
 
     @Test
     public void verifySaveToken() {
-        final String data = "THE_TOKEN";
-        try (MockWebServer webServer = new MockWebServer(9293,
+        val data = "THE_TOKEN";
+        try (val webServer = new MockWebServer(9293,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
             passwordlessTokenRepository.saveToken("casuser", data);
@@ -116,7 +117,7 @@ public class RestfulPasswordlessTokenRepositoryTests {
 
     @Test
     public void verifyDeleteToken() {
-        try (MockWebServer webServer = new MockWebServer(9293,
+        try (val webServer = new MockWebServer(9293,
             new ByteArrayResource(StringUtils.EMPTY.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
             passwordlessTokenRepository.deleteToken("casuser", "123456");

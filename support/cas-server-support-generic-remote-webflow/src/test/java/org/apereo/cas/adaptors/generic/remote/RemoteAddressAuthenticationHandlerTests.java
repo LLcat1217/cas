@@ -1,7 +1,6 @@
 package org.apereo.cas.adaptors.generic.remote;
 
 import org.apereo.cas.authentication.AuthenticationHandler;
-import org.apereo.cas.authentication.AuthenticationHandlerExecutionResult;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationPolicyConfiguration;
@@ -27,6 +26,8 @@ import org.apereo.cas.util.junit.ConditionalSpringRunner;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,15 +79,15 @@ public class RemoteAddressAuthenticationHandlerTests {
 
     @Test
     public void verifyAccount() throws Exception {
-        final RemoteAddressCredential c = new RemoteAddressCredential("192.168.1.7");
-        final AuthenticationHandlerExecutionResult result = remoteAddressAuthenticationHandler.authenticate(c);
+        val c = new RemoteAddressCredential("192.168.1.7");
+        val result = remoteAddressAuthenticationHandler.authenticate(c);
         assertNotNull(result);
         assertEquals(c.getId(), result.getPrincipal().getId());
     }
 
     @Test
     public void verifySupports() {
-        final RemoteAddressCredential c = new RemoteAddressCredential("172.217.12.206");
+        val c = new RemoteAddressCredential("172.217.12.206");
         assertTrue(remoteAddressAuthenticationHandler.supports(c));
         assertFalse(remoteAddressAuthenticationHandler.supports(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword()));
     }

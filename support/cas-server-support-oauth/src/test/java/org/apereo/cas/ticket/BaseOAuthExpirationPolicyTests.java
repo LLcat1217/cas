@@ -1,10 +1,6 @@
 package org.apereo.cas.ticket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
-import org.apereo.cas.authentication.principal.Principal;
-import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.config.CasCoreAuthenticationPrincipalConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationSupportConfiguration;
 import org.apereo.cas.config.CasCoreConfiguration;
@@ -29,6 +25,10 @@ import org.apereo.cas.ticket.refreshtoken.RefreshTokenFactory;
 import org.apereo.cas.ticket.support.HardTimeoutExpirationPolicy;
 import org.apereo.cas.util.DefaultUniqueTicketIdGenerator;
 import org.apereo.cas.web.config.CasCookieConfiguration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,9 +81,9 @@ public abstract class BaseOAuthExpirationPolicyTests {
     @Autowired
     @Qualifier("defaultRefreshTokenFactory")
     protected RefreshTokenFactory defaultRefreshTokenFactory;
-    
+
     protected TicketGrantingTicket newTicketGrantingTicket() {
-        final Principal principal = CoreAuthenticationTestUtils.getPrincipal("casuser");
+        val principal = CoreAuthenticationTestUtils.getPrincipal("casuser");
         return new TicketGrantingTicketImpl(
             ID_GENERATOR.getNewTicketId(TicketGrantingTicket.PREFIX),
             CoreAuthenticationTestUtils.getAuthentication(principal),
@@ -91,13 +91,13 @@ public abstract class BaseOAuthExpirationPolicyTests {
     }
 
     protected AccessToken newAccessToken(final TicketGrantingTicket tgt) {
-        final Service testService = CoreAuthenticationTestUtils.getService("https://service.example.com");
+        val testService = CoreAuthenticationTestUtils.getService("https://service.example.com");
         return defaultAccessTokenFactory.create(testService, tgt.getAuthentication(), tgt, new ArrayList<>());
     }
 
     protected RefreshToken newRefreshToken(final AccessToken at) {
-        final Service testService = CoreAuthenticationTestUtils.getService("https://service.example.com");
-        final RefreshToken rt = defaultRefreshTokenFactory.create(testService, at.getAuthentication(),
+        val testService = CoreAuthenticationTestUtils.getService("https://service.example.com");
+        val rt = defaultRefreshTokenFactory.create(testService, at.getAuthentication(),
             at.getTicketGrantingTicket(), new ArrayList<>());
         at.getTicketGrantingTicket().getDescendantTickets().add(rt.getId());
         return rt;

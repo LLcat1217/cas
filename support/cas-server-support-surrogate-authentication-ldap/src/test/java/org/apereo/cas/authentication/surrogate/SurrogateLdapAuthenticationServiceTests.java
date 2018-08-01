@@ -1,6 +1,5 @@
 package org.apereo.cas.authentication.surrogate;
 
-import com.unboundid.ldap.sdk.LDAPConnection;
 import org.apereo.cas.adaptors.ldap.LdapIntegrationTestsOperations;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.category.LdapCategory;
@@ -33,6 +32,10 @@ import org.apereo.cas.util.junit.RunningContinuousIntegrationCondition;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import com.unboundid.ldap.sdk.LDAPConnection;
+import lombok.SneakyThrows;
+import lombok.val;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -47,9 +50,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
-import java.util.Collection;
-import lombok.SneakyThrows;
-
 import static org.junit.Assert.*;
 
 /**
@@ -60,7 +60,8 @@ import static org.junit.Assert.*;
  */
 @TestPropertySource(locations = "classpath:/surrogate-ldap.properties")
 @Category(LdapCategory.class)
-@SpringBootTest(classes = {RefreshAutoConfiguration.class,
+@SpringBootTest(classes = {
+    RefreshAutoConfiguration.class,
     CasCoreAuthenticationPrincipalConfiguration.class,
     CasCoreAuthenticationPolicyConfiguration.class,
     CasCoreAuthenticationMetadataConfiguration.class,
@@ -107,24 +108,10 @@ public class SurrogateLdapAuthenticationServiceTests {
     @Qualifier("surrogateAuthenticationService")
     private SurrogateAuthenticationService surrogateAuthenticationService;
 
-    @Test
-    public void verifyAccountsQualifying() {
-        final Collection results = surrogateAuthenticationService.getEligibleAccountsForSurrogateToProxy("casuser");
-        assertFalse(results.isEmpty());
-    }
-
-    @Test
-    public void verifyAccountQualifying() {
-        final boolean result = surrogateAuthenticationService.canAuthenticateAs("cassurrogate",
-            CoreAuthenticationTestUtils.getPrincipal("casuser"),
-            CoreAuthenticationTestUtils.getService());
-        assertTrue(result);
-    }
-
     @BeforeClass
     @SneakyThrows
     public static void bootstrap() {
-        final LDAPConnection localhost = new LDAPConnection("localhost", LDAP_PORT,
+        val localhost = new LDAPConnection("localhost", LDAP_PORT,
             "cn=Directory Manager", "password");
         localhost.connect("localhost", LDAP_PORT);
         localhost.bind("cn=Directory Manager", "password");
@@ -132,5 +119,19 @@ public class SurrogateLdapAuthenticationServiceTests {
             localhost,
             new ClassPathResource("ldif/ldap-surrogate.ldif").getInputStream(),
             "ou=people,dc=example,dc=org");
+    }
+
+    @Test
+    public void verifyAccountsQualifying() {
+        val results = surrogateAuthenticationService.getEligibleAccountsForSurrogateToProxy("casuser");
+        assertFalse(results.isEmpty());
+    }
+
+    @Test
+    public void verifyAccountQualifying() {
+        val result = surrogateAuthenticationService.canAuthenticateAs("cassurrogate",
+            CoreAuthenticationTestUtils.getPrincipal("casuser"),
+            CoreAuthenticationTestUtils.getService());
+        assertTrue(result);
     }
 }

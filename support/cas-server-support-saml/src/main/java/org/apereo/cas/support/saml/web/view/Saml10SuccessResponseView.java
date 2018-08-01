@@ -1,27 +1,21 @@
 package org.apereo.cas.support.saml.web.view;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.CasProtocolConstants;
-import org.apereo.cas.authentication.Authentication;
-import org.apereo.cas.authentication.ProtocolAttributeEncoder;
-import org.apereo.cas.authentication.principal.Principal;
-import org.apereo.cas.authentication.principal.Service;
-import org.apereo.cas.services.RegisteredService;
-import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.authentication.AuthenticationAttributeReleasePolicy;
+import org.apereo.cas.authentication.ProtocolAttributeEncoder;
+import org.apereo.cas.authentication.principal.Service;
+import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.support.saml.authentication.SamlAuthenticationMetaDataPopulator;
 import org.apereo.cas.support.saml.util.Saml10ObjectBuilder;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.DateTimeUtils;
 import org.apereo.cas.web.support.ArgumentExtractor;
-import org.opensaml.saml.saml1.core.Assertion;
-import org.opensaml.saml.saml1.core.AuthenticationStatement;
-import org.opensaml.saml.saml1.core.Conditions;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.opensaml.saml.saml1.core.Response;
 import org.opensaml.saml.saml1.core.StatusCode;
-import org.opensaml.saml.saml1.core.Subject;
 
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +38,7 @@ import java.util.Map;
 @Slf4j
 public class Saml10SuccessResponseView extends AbstractSaml10ResponseView {
 
-    
+
     private final String issuer;
     private final String rememberMeAttributeName;
     private final String defaultAttributeNamespace;
@@ -61,7 +55,7 @@ public class Saml10SuccessResponseView extends AbstractSaml10ResponseView {
                                      final String defaultAttributeNamespace,
                                      final AuthenticationAttributeReleasePolicy authAttrReleasePolicy) {
         super(true, protocolAttributeEncoder, servicesManager, authenticationContextAttribute, samlObjectBuilder,
-                samlArgumentExtractor, encoding, skewAllowance, issueLength, authAttrReleasePolicy);
+            samlArgumentExtractor, encoding, skewAllowance, issueLength, authAttrReleasePolicy);
         this.issuer = issuer;
         this.rememberMeAttributeName = CasProtocolConstants.VALIDATION_REMEMBER_ME_ATTRIBUTE_NAME;
         this.defaultAttributeNamespace = defaultAttributeNamespace;
@@ -70,42 +64,42 @@ public class Saml10SuccessResponseView extends AbstractSaml10ResponseView {
     @Override
     protected void prepareResponse(final Response response, final Map<String, Object> model) {
 
-        final ZonedDateTime issuedAt = DateTimeUtils.zonedDateTimeOf(response.getIssueInstant());
-        final Service service = getAssertionFrom(model).getService();
+        val issuedAt = DateTimeUtils.zonedDateTimeOf(response.getIssueInstant());
+        val service = getAssertionFrom(model).getService();
         LOGGER.debug("Preparing SAML response for service [{}]", service);
-        
-        final Authentication authentication = getPrimaryAuthenticationFrom(model);
+
+        val authentication = getPrimaryAuthenticationFrom(model);
         final Collection<Object> authnMethods = CollectionUtils.toCollection(authentication.getAttributes()
-                .get(SamlAuthenticationMetaDataPopulator.ATTRIBUTE_AUTHENTICATION_METHOD));
+            .get(SamlAuthenticationMetaDataPopulator.ATTRIBUTE_AUTHENTICATION_METHOD));
         LOGGER.debug("Authentication methods found are [{}]", authnMethods);
 
-        final Principal principal = getPrincipal(model);
-        final AuthenticationStatement authnStatement = this.samlObjectBuilder.newAuthenticationStatement(
-                authentication.getAuthenticationDate(), authnMethods, principal.getId());
+        val principal = getPrincipal(model);
+        val authnStatement = this.samlObjectBuilder.newAuthenticationStatement(
+            authentication.getAuthenticationDate(), authnMethods, principal.getId());
         LOGGER.debug("Built authentication statement for [{}] dated at [{}]", principal, authentication.getAuthenticationDate());
-        
-        final Assertion assertion = this.samlObjectBuilder.newAssertion(authnStatement, this.issuer, issuedAt,
-                this.samlObjectBuilder.generateSecureRandomId());
+
+        val assertion = this.samlObjectBuilder.newAssertion(authnStatement, this.issuer, issuedAt,
+            this.samlObjectBuilder.generateSecureRandomId());
         LOGGER.debug("Built assertion for issuer [{}] dated at [{}]", this.issuer, issuedAt);
-        
-        final Conditions conditions = this.samlObjectBuilder.newConditions(issuedAt, service.getId(), this.issueLength);
+
+        val conditions = this.samlObjectBuilder.newConditions(issuedAt, service.getId(), this.issueLength);
         assertion.setConditions(conditions);
         LOGGER.debug("Built assertion conditions for issuer [{}] and service [{}] ", this.issuer, service.getId());
-        
-        final Subject subject = this.samlObjectBuilder.newSubject(principal.getId());
+
+        val subject = this.samlObjectBuilder.newSubject(principal.getId());
         LOGGER.debug("Built subject for principal [{}]", principal);
 
-        final Map<String, Object> attributesToSend = prepareSamlAttributes(model, service);
+        val attributesToSend = prepareSamlAttributes(model, service);
         LOGGER.debug("Authentication statement shall include these attributes [{}]", attributesToSend);
-        
+
         if (!attributesToSend.isEmpty()) {
             assertion.getAttributeStatements().add(this.samlObjectBuilder.newAttributeStatement(
-                    subject, attributesToSend, this.defaultAttributeNamespace));
+                subject, attributesToSend, this.defaultAttributeNamespace));
         }
 
         response.setStatus(this.samlObjectBuilder.newStatus(StatusCode.SUCCESS, null));
         LOGGER.debug("Set response status code to [{}]", response.getStatus());
-        
+
         response.getAssertions().add(assertion);
     }
 
@@ -120,15 +114,15 @@ public class Saml10SuccessResponseView extends AbstractSaml10ResponseView {
      * @since 4.1.0
      */
     private Map<String, Object> prepareSamlAttributes(final Map<String, Object> model, final Service service) {
-        final Map<String, Object> authnAttributes = authenticationAttributeReleasePolicy
-                .getAuthenticationAttributesForRelease(getPrimaryAuthenticationFrom(model));
+        val authnAttributes = authenticationAttributeReleasePolicy
+            .getAuthenticationAttributesForRelease(getPrimaryAuthenticationFrom(model));
         if (isRememberMeAuthentication(model)) {
             authnAttributes.put(this.rememberMeAttributeName, Boolean.TRUE.toString());
         }
         LOGGER.debug("Retrieved authentication attributes [{}] from the model", authnAttributes);
-        
-        final RegisteredService registeredService = this.servicesManager.findServiceBy(service);
-        final Map<String, Object> attributesToReturn = new HashMap<>();
+
+        val registeredService = this.servicesManager.findServiceBy(service);
+        val attributesToReturn = new HashMap<String, Object>();
         attributesToReturn.putAll(getPrincipalAttributesAsMultiValuedAttributes(model));
         attributesToReturn.putAll(authnAttributes);
 
@@ -136,9 +130,9 @@ public class Saml10SuccessResponseView extends AbstractSaml10ResponseView {
         decideIfProxyGrantingTicketShouldBeReleasedAsAttribute(attributesToReturn, model, registeredService);
 
         LOGGER.debug("Beginning to encode attributes [{}] for service [{}]", attributesToReturn, registeredService.getServiceId());
-        final Map<String, Object> finalAttributes = this.protocolAttributeEncoder.encodeAttributes(attributesToReturn, registeredService);
+        val finalAttributes = this.protocolAttributeEncoder.encodeAttributes(attributesToReturn, registeredService);
         LOGGER.debug("Final collection of attributes are [{}]", finalAttributes);
-        
+
         return finalAttributes;
     }
 

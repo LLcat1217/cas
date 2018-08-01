@@ -1,6 +1,5 @@
 package org.apereo.cas.authentication;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.CasCoreAuthenticationPrincipalConfiguration;
 import org.apereo.cas.config.CasCoreHttpConfiguration;
 import org.apereo.cas.config.CasCoreServicesConfiguration;
@@ -12,6 +11,8 @@ import org.apereo.cas.config.CasRegisteredServicesTestConfiguration;
 import org.apereo.cas.config.SurrogateAuthenticationAuditConfiguration;
 import org.apereo.cas.config.SurrogateAuthenticationConfiguration;
 import org.apereo.cas.services.RegisteredServiceTestUtils;
+
+import lombok.val;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,7 +34,6 @@ import static org.mockito.Mockito.*;
  * @since 5.3.0
  */
 @RunWith(SpringRunner.class)
-@Slf4j
 @SpringBootTest(classes = {
     RefreshAutoConfiguration.class,
     CasCoreServicesConfiguration.class,
@@ -64,11 +64,11 @@ public class SurrogateAuthenticationPostProcessorTests {
 
     @Test
     public void verifySurrogateCredentialNotFound() {
-        final SurrogateUsernamePasswordCredential c = new SurrogateUsernamePasswordCredential();
+        val c = new SurrogateUsernamePasswordCredential();
         c.setUsername("casuser");
         c.setPassword("Mellon");
-        final AuthenticationTransaction transaction = DefaultAuthenticationTransaction.of(RegisteredServiceTestUtils.getService("service"), c);
-        final AuthenticationBuilder builder = mock(AuthenticationBuilder.class);
+        val transaction = DefaultAuthenticationTransaction.of(RegisteredServiceTestUtils.getService("service"), c);
+        val builder = mock(AuthenticationBuilder.class);
         when(builder.build()).thenReturn(CoreAuthenticationTestUtils.getAuthentication("casuser"));
         thrown.expect(AuthenticationException.class);
         surrogateAuthenticationPostProcessor.process(builder, transaction);
@@ -76,13 +76,13 @@ public class SurrogateAuthenticationPostProcessorTests {
 
     @Test
     public void verifyProcessorWorks() {
-        final SurrogateUsernamePasswordCredential c = new SurrogateUsernamePasswordCredential();
+        val c = new SurrogateUsernamePasswordCredential();
         c.setUsername("casuser");
         c.setPassword("Mellon");
         c.setSurrogateUsername("cassurrogate");
-        final AuthenticationTransaction transaction = DefaultAuthenticationTransaction.of(
+        val transaction = DefaultAuthenticationTransaction.of(
             RegisteredServiceTestUtils.getService("https://localhost"), c);
-        final AuthenticationBuilder builder = mock(AuthenticationBuilder.class);
+        val builder = mock(AuthenticationBuilder.class);
         when(builder.build()).thenReturn(CoreAuthenticationTestUtils.getAuthentication("casuser"));
         surrogateAuthenticationPostProcessor.process(builder, transaction);
     }

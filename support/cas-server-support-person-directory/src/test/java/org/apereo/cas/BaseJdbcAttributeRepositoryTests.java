@@ -1,10 +1,12 @@
 package org.apereo.cas;
 
-import lombok.Cleanup;
-import lombok.SneakyThrows;
 import org.apereo.cas.config.CasPersonDirectoryConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.support.JpaBeans;
+
+import lombok.Cleanup;
+import lombok.SneakyThrows;
+import lombok.val;
 import org.apereo.services.persondir.IPersonAttributeDao;
 import org.junit.After;
 import org.junit.Before;
@@ -16,7 +18,6 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.Statement;
 
 /**
@@ -44,8 +45,8 @@ public abstract class BaseJdbcAttributeRepositoryTests {
     public void setupDatabase() {
         this.dataSource = JpaBeans.newDataSource(casProperties.getAuthn().getAttributeRepository().getJdbc().get(0));
         @Cleanup
-        final Connection c = dataSource.getConnection();
-        final Statement s = c.createStatement();
+        val c = dataSource.getConnection();
+        val s = c.createStatement();
         c.setAutoCommit(true);
         prepareDatabaseTable(s);
     }
@@ -56,8 +57,8 @@ public abstract class BaseJdbcAttributeRepositoryTests {
     @SneakyThrows
     public void cleanup() {
         @Cleanup
-        final Connection c = dataSource.getConnection();
-        final Statement s = c.createStatement();
+        val c = dataSource.getConnection();
+        val s = c.createStatement();
         c.setAutoCommit(true);
         s.execute("delete from table_users;");
         s.execute("drop table table_users;");

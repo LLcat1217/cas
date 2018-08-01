@@ -1,6 +1,5 @@
 package org.apereo.cas.impl.account;
 
-import org.apereo.cas.api.PasswordlessUserAccount;
 import org.apereo.cas.api.PasswordlessUserAccountStore;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
@@ -25,6 +24,8 @@ import org.apereo.cas.services.web.config.CasThemesConfiguration;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -80,7 +79,7 @@ public class GroovyPasswordlessUserAccountStoreTests {
 
     @Test
     public void verifyAction() {
-        final Optional<PasswordlessUserAccount> user = passwordlessUserAccountStore.findUser("casuser");
+        val user = passwordlessUserAccountStore.findUser("casuser");
         assertTrue(user.isPresent());
     }
 }

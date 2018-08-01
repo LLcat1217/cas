@@ -1,12 +1,13 @@
 package org.apereo.cas.trusted.authentication.api;
 
+import org.apereo.cas.util.jpa.SkippingNanoSecondsLocalDateTimeConverter;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-import org.apereo.cas.util.jpa.SkippingNanoSecondsLocalDateTimeConverter;
+import lombok.val;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -29,7 +30,6 @@ import java.time.temporal.ChronoUnit;
 @Entity
 @Table(name = "MultifactorAuthenticationTrustRecord")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Slf4j
 @ToString
 @Getter
 @Setter
@@ -71,7 +71,7 @@ public class MultifactorAuthenticationTrustRecord implements Comparable<Multifac
      * @return the authentication trust record
      */
     public static MultifactorAuthenticationTrustRecord newInstance(final String principal, final String geography, final String fingerprint) {
-        final MultifactorAuthenticationTrustRecord r = new MultifactorAuthenticationTrustRecord();
+        val r = new MultifactorAuthenticationTrustRecord();
         r.setRecordDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         r.setPrincipal(principal);
         r.setDeviceFingerprint(fingerprint);

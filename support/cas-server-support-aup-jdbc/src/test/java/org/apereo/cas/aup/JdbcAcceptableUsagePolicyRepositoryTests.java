@@ -1,7 +1,6 @@
 package org.apereo.cas.aup;
 
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
-import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.config.CasAcceptableUsagePolicyJdbcConfiguration;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationPrincipalConfiguration;
@@ -20,10 +19,11 @@ import org.apereo.cas.config.CasRegisteredServicesTestConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
-import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.web.support.WebUtils;
+
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,8 +40,6 @@ import org.springframework.webflow.context.servlet.ServletExternalContext;
 import org.springframework.webflow.test.MockRequestContext;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.Statement;
 
 import static org.junit.Assert.*;
 
@@ -87,9 +85,9 @@ public class JdbcAcceptableUsagePolicyRepositoryTests {
     private TicketRegistry ticketRegistry;
 
     @Before
-    public void setUp() throws Exception {
-        final Connection c = this.acceptableUsagePolicyDataSource.getConnection();
-        final Statement s = c.createStatement();
+    public void initialize() throws Exception {
+        val c = this.acceptableUsagePolicyDataSource.getConnection();
+        val s = c.createStatement();
         c.setAutoCommit(true);
         s.execute("CREATE TABLE aup_table (id int primary key, username varchar(255), accepted boolean)");
         s.execute("INSERT INTO aup_table (id, username, accepted) values (100, 'casuser', false);");
@@ -98,11 +96,11 @@ public class JdbcAcceptableUsagePolicyRepositoryTests {
 
     @Test
     public void verifyAction() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
-        final Credential c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casuser");
-        final TicketGrantingTicket tgt = new MockTicketGrantingTicket("casuser", c, CollectionUtils.wrap("accepted", "false"));
+        val c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casuser");
+        val tgt = new MockTicketGrantingTicket("casuser", c, CollectionUtils.wrap("accepted", "false"));
         ticketRegistry.addTicket(tgt);
         WebUtils.putTicketGrantingTicketInScopes(context, tgt);
 

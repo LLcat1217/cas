@@ -1,8 +1,8 @@
 package org.apereo.cas.support.x509.rest;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.adaptors.x509.authentication.principal.X509CertificateCredential;
-import org.apereo.cas.authentication.Credential;
+
+import lombok.val;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -11,11 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Scanner;
 
 import static org.junit.Assert.*;
@@ -27,7 +25,6 @@ import static org.junit.Assert.*;
  * @since 5.1.0
  */
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Slf4j
 public class X509RestHttpRequestCredentialFactoryTests {
 
     @Rule
@@ -38,22 +35,22 @@ public class X509RestHttpRequestCredentialFactoryTests {
 
     @Test
     public void createX509Credential() throws IOException {
-        final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        final Scanner scan = new Scanner(new ClassPathResource("ldap-crl.crt").getFile(), StandardCharsets.UTF_8.name());
-        final String certStr = scan.useDelimiter("\\Z").next();
+        val requestBody = new LinkedMultiValueMap<String, String>();
+        val scan = new Scanner(new ClassPathResource("ldap-crl.crt").getFile(), StandardCharsets.UTF_8.name());
+        val certStr = scan.useDelimiter("\\Z").next();
         scan.close();
         requestBody.add("cert", certStr);
 
-        final Credential cred = factory.fromRequestBody(requestBody).iterator().next();
+        val cred = factory.fromRequestBody(requestBody).iterator().next();
         assertTrue(cred instanceof X509CertificateCredential);
     }
 
     @Test
     public void createDefaultCredential() {
-        final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        val requestBody = new LinkedMultiValueMap<String, String>();
         requestBody.add("username", "name");
         requestBody.add("password", "passwd");
-        final Collection cred = factory.fromRequestBody(requestBody);
+        val cred = factory.fromRequestBody(requestBody);
         assertTrue(cred.isEmpty());
     }
 }

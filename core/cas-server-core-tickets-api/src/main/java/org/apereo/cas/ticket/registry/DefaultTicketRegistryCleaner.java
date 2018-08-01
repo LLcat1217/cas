@@ -1,11 +1,13 @@
 package org.apereo.cas.ticket.registry;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.logout.LogoutManager;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.support.LockingStrategy;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -54,7 +56,7 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner, Seri
      * Clean tickets.
      */
     protected void cleanInternal() {
-        final int ticketsDeleted = ticketRegistry.getTicketsStream()
+        val ticketsDeleted = ticketRegistry.getTicketsStream()
             .filter(Ticket::isExpired)
             .mapToInt(this::cleanTicket)
             .sum();

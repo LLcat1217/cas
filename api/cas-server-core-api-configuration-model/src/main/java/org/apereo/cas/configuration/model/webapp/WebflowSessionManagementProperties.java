@@ -1,10 +1,11 @@
 package org.apereo.cas.configuration.model.webapp;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
+import java.io.Serializable;
 
 /**
  * This is {@link WebflowSessionManagementProperties}.
@@ -12,7 +13,6 @@ import lombok.Setter;
  * @author Misagh Moayyed
  * @since 5.2.0
  */
-
 @Getter
 @Setter
 public class WebflowSessionManagementProperties implements Serializable {

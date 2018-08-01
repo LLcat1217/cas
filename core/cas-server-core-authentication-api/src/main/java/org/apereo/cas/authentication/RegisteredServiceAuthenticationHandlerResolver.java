@@ -1,14 +1,13 @@
 package org.apereo.cas.authentication;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.handler.support.HttpBasedServiceCredentialsAuthenticationHandler;
-import org.apereo.cas.authentication.principal.Service;
-import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.services.UnauthorizedSsoServiceException;
 
-import java.util.Iterator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -21,7 +20,7 @@ import java.util.Set;
  * @since 5.0.0
  */
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RegisteredServiceAuthenticationHandlerResolver implements AuthenticationHandlerResolver {
 
     /**
@@ -31,9 +30,9 @@ public class RegisteredServiceAuthenticationHandlerResolver implements Authentic
 
     @Override
     public boolean supports(final Set<AuthenticationHandler> handlers, final AuthenticationTransaction transaction) {
-        final Service service = transaction.getService();
+        val service = transaction.getService();
         if (service != null) {
-            final RegisteredService registeredService = this.servicesManager.findServiceBy(service);
+            val registeredService = this.servicesManager.findServiceBy(service);
             LOGGER.debug("Located registered service definition [{}] for this authentication transaction", registeredService);
             if (registeredService == null || !registeredService.getAccessStrategy().isServiceAccessAllowed()) {
                 LOGGER.warn("Service [{}] is not allowed to use SSO.", registeredService);
@@ -46,18 +45,18 @@ public class RegisteredServiceAuthenticationHandlerResolver implements Authentic
 
     @Override
     public Set<AuthenticationHandler> resolve(final Set<AuthenticationHandler> candidateHandlers, final AuthenticationTransaction transaction) {
-        final Service service = transaction.getService();
-        final RegisteredService registeredService = this.servicesManager.findServiceBy(service);
+        val service = transaction.getService();
+        val registeredService = this.servicesManager.findServiceBy(service);
 
-        final Set<String> requiredHandlers = registeredService.getRequiredHandlers();
+        val requiredHandlers = registeredService.getRequiredHandlers();
         LOGGER.debug("Authentication transaction requires [{}] for service [{}]", requiredHandlers, service);
-        final Set<AuthenticationHandler> handlerSet = new LinkedHashSet<>(candidateHandlers);
+        val handlerSet = new LinkedHashSet<>(candidateHandlers);
         LOGGER.info("Candidate authentication handlers examined this transaction are [{}]", handlerSet);
 
-        final Iterator<AuthenticationHandler> it = handlerSet.iterator();
+        val it = handlerSet.iterator();
         while (it.hasNext()) {
-            final AuthenticationHandler handler = it.next();
-            final String handlerName = handler.getName();
+            val handler = it.next();
+            val handlerName = handler.getName();
             if (!(handler instanceof HttpBasedServiceCredentialsAuthenticationHandler) && !requiredHandlers.contains(handlerName)) {
                 LOGGER.debug("Authentication handler [{}] is not required for this transaction and is removed", handlerName);
                 it.remove();

@@ -1,10 +1,11 @@
 package org.apereo.cas.aup;
 
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
-import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.ticket.registry.TicketRegistrySupport;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.web.support.WebUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -28,19 +29,19 @@ public class DefaultAcceptableUsagePolicyRepositoryTests {
 
     @Test
     public void verifyAction() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
 
-        final TicketRegistrySupport support = mock(TicketRegistrySupport.class);
+        val support = mock(TicketRegistrySupport.class);
         when(support.getAuthenticatedPrincipalFrom(anyString()))
             .thenReturn(CoreAuthenticationTestUtils.getPrincipal(CollectionUtils.wrap("carLicense", "false")));
-        final DefaultAcceptableUsagePolicyRepository repo = new DefaultAcceptableUsagePolicyRepository(support);
+        val repo = new DefaultAcceptableUsagePolicyRepository(support);
 
         WebUtils.putAuthentication(CoreAuthenticationTestUtils.getAuthentication(), context);
         WebUtils.putTicketGrantingTicketInScopes(context, "TGT-12345");
 
-        final Credential c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casaup");
+        val c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casaup");
         assertFalse(repo.verify(context, c).getLeft());
         assertTrue(repo.submit(context, c));
         assertTrue(repo.verify(context, c).getLeft());

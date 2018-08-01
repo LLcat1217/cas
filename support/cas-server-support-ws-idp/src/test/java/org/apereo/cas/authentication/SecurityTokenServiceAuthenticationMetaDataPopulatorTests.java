@@ -1,6 +1,5 @@
 package org.apereo.cas.authentication;
 
-import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationPrincipalConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationServiceSelectionStrategyConfiguration;
@@ -25,6 +24,8 @@ import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.ws.idp.WSFederationConstants;
 import org.apereo.cas.ws.idp.services.WSFederationRegisteredService;
+
+import lombok.val;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -84,9 +85,9 @@ public class SecurityTokenServiceAuthenticationMetaDataPopulatorTests {
 
     @Test
     public void verifySecurityPopulator() {
-        final String realm = casProperties.getAuthn().getWsfedIdp().getIdp().getRealm();
+        val realm = casProperties.getAuthn().getWsfedIdp().getIdp().getRealm();
 
-        final WSFederationRegisteredService registeredService = new WSFederationRegisteredService();
+        val registeredService = new WSFederationRegisteredService();
         registeredService.setRealm(realm);
         registeredService.setServiceId("http://app.example.org/wsfed-idp");
         registeredService.setName("WSFED App");
@@ -95,10 +96,10 @@ public class SecurityTokenServiceAuthenticationMetaDataPopulatorTests {
         registeredService.setWsdlLocation("classpath:wsdl/ws-trust-1.4-service.wsdl");
         servicesManager.save(registeredService);
 
-        final AuthenticationBuilder builder = CoreAuthenticationTestUtils.getAuthenticationBuilder();
-        final Service service = CoreAuthenticationTestUtils.getService("http://example.org?"
-            + WSFederationConstants.WREPLY + "=" + registeredService.getServiceId() + "&"
-            + WSFederationConstants.WTREALM + "=" + realm);
+        val builder = CoreAuthenticationTestUtils.getAuthenticationBuilder();
+        val service = CoreAuthenticationTestUtils.getService("http://example.org?"
+            + WSFederationConstants.WREPLY + '=' + registeredService.getServiceId() + '&'
+            + WSFederationConstants.WTREALM + '=' + realm);
         final AuthenticationTransaction transaction =
             DefaultAuthenticationTransaction.of(service, CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword());
 

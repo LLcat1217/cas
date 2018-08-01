@@ -1,18 +1,18 @@
 package org.apereo.cas.couchdb.core;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.configuration.model.support.couchdb.AbstractCouchDbProperties;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.CouchDbInstance;
-import org.ektorp.http.HttpClient;
-import org.ektorp.http.StdHttpClient;
-import org.ektorp.impl.StdCouchDbConnector;
-import org.ektorp.impl.StdCouchDbInstance;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.http.StdHttpClient;
+import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
 
 /**
  * This is {@link CouchDbConnectorFactory}.
@@ -31,11 +31,12 @@ public class CouchDbConnectorFactory {
 
     /**
      * Create {@link CouchDbConnector} instance.
+     *
      * @return CouchDbConnector instance from db properties.
      */
     @SneakyThrows
     public CouchDbConnector create() {
-        final StdHttpClient.Builder builder = new StdHttpClient.Builder()
+        val builder = new StdHttpClient.Builder()
             .url(couchDbProperties.getUrl())
             .maxConnections(couchDbProperties.getMaxConnections())
             .maxCacheEntries(couchDbProperties.getMaxCacheEntries())
@@ -57,7 +58,7 @@ public class CouchDbConnectorFactory {
             builder.password(couchDbProperties.getPassword());
         }
 
-        final HttpClient httpClient = builder.build();
+        val httpClient = builder.build();
         couchDbInstance = new StdCouchDbInstance(httpClient);
         couchDbConnector = new StdCouchDbConnector(couchDbProperties.getDbName(), couchDbInstance);
         return couchDbConnector;

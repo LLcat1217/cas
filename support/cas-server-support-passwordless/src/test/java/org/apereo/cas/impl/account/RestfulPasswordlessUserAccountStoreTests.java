@@ -1,6 +1,5 @@
 package org.apereo.cas.impl.account;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apereo.cas.api.PasswordlessUserAccount;
 import org.apereo.cas.api.PasswordlessUserAccountStore;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
@@ -27,6 +26,9 @@ import org.apereo.cas.util.MockWebServer;
 import org.apereo.cas.web.config.CasCookieConfiguration;
 import org.apereo.cas.web.flow.config.CasCoreWebflowConfiguration;
 import org.apereo.cas.web.flow.config.CasWebflowContextConfiguration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -87,12 +88,12 @@ public class RestfulPasswordlessUserAccountStoreTests {
 
     @Test
     public void verifyAction() throws Exception {
-        final PasswordlessUserAccount u = new PasswordlessUserAccount("casuser", "casuser@example.org", "123-456-7890", "CAS");
-        final String data = MAPPER.writeValueAsString(u);
-        try (MockWebServer webServer = new MockWebServer(9291,
+        val u = new PasswordlessUserAccount("casuser", "casuser@example.org", "123-456-7890", "CAS");
+        val data = MAPPER.writeValueAsString(u);
+        try (val webServer = new MockWebServer(9291,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"), MediaType.APPLICATION_JSON_VALUE)) {
             webServer.start();
-            final Optional<PasswordlessUserAccount> user = passwordlessUserAccountStore.findUser("casuser");
+            val user = passwordlessUserAccountStore.findUser("casuser");
             assertTrue(user.isPresent());
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);

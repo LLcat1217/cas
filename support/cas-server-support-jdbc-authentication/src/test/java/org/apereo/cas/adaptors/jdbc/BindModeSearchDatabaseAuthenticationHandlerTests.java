@@ -1,9 +1,10 @@
 package org.apereo.cas.adaptors.jdbc;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.principal.PrincipalFactoryUtils;
 import org.apereo.cas.services.ServicesManager;
+
+import lombok.val;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,7 +33,6 @@ import static org.mockito.Mockito.*;
     RefreshAutoConfiguration.class,
     DatabaseAuthenticationTestConfiguration.class
 })
-@Slf4j
 @TestPropertySource(properties = {
     "database.user=casuser",
     "database.name:cas-bindmode-authentications",
@@ -48,7 +48,7 @@ public class BindModeSearchDatabaseAuthenticationHandlerTests {
 
     @Test
     public void verifyAction() throws Exception {
-        final BindModeSearchDatabaseAuthenticationHandler h = new BindModeSearchDatabaseAuthenticationHandler(null, mock(ServicesManager.class),
+        val h = new BindModeSearchDatabaseAuthenticationHandler(null, mock(ServicesManager.class),
             PrincipalFactoryUtils.newPrincipalFactory(), 0, this.dataSource);
         assertNotNull(h.authenticate(CoreAuthenticationTestUtils.getCredentialsWithDifferentUsernameAndPassword("casuser", "Mellon")));
     }

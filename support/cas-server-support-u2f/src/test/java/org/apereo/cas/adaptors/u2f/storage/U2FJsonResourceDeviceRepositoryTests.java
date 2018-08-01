@@ -1,9 +1,11 @@
 package org.apereo.cas.adaptors.u2f.storage;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apereo.cas.config.U2FConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.io.FileUtils;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +36,7 @@ public class U2FJsonResourceDeviceRepositoryTests extends AbstractU2FDeviceRepos
 
     static {
         try {
-            final File file = new File(System.getProperty("java.io.tmpdir"), "u2f.json");
+            val file = new File(System.getProperty("java.io.tmpdir"), "u2f.json");
             if (file.exists()) {
                 FileUtils.forceDelete(file);
             }

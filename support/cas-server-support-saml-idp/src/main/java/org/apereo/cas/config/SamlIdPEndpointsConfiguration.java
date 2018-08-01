@@ -1,12 +1,10 @@
 package org.apereo.cas.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.AuthenticationSystemSupport;
 import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.support.saml.idp.SamlIdPAlgorithmsProperties;
 import org.apereo.cas.services.RegexRegisteredService;
 import org.apereo.cas.services.ServiceRegistryExecutionPlan;
 import org.apereo.cas.services.ServiceRegistryExecutionPlanConfigurer;
@@ -35,6 +33,9 @@ import org.apereo.cas.ticket.query.SamlAttributeQueryTicketFactory;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.util.RandomUtils;
 import org.apereo.cas.web.support.CookieRetrievingCookieGenerator;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.jasig.cas.client.validation.AbstractUrlBasedTicketValidator;
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
 import org.opensaml.saml.saml2.core.Response;
@@ -140,7 +141,7 @@ public class SamlIdPEndpointsConfiguration implements ServiceRegistryExecutionPl
     @ConditionalOnMissingBean(name = "samlIdPObjectSignatureValidator")
     @Bean
     public SamlObjectSignatureValidator samlIdPObjectSignatureValidator() {
-        final SamlIdPAlgorithmsProperties algs = casProperties.getAuthn().getSamlIdp().getAlgs();
+        val algs = casProperties.getAuthn().getSamlIdp().getAlgs();
         return new SamlIdPObjectSignatureValidator(
             algs.getOverrideSignatureReferenceDigestMethods(),
             algs.getOverrideSignatureAlgorithms(),
@@ -154,7 +155,7 @@ public class SamlIdPEndpointsConfiguration implements ServiceRegistryExecutionPl
     @ConditionalOnMissingBean(name = "samlObjectSignatureValidator")
     @Bean
     public SamlObjectSignatureValidator samlObjectSignatureValidator() {
-        final SamlIdPAlgorithmsProperties algs = casProperties.getAuthn().getSamlIdp().getAlgs();
+        val algs = casProperties.getAuthn().getSamlIdp().getAlgs();
         return new SamlObjectSignatureValidator(
             algs.getOverrideSignatureReferenceDigestMethods(),
             algs.getOverrideSignatureAlgorithms(),
@@ -339,16 +340,16 @@ public class SamlIdPEndpointsConfiguration implements ServiceRegistryExecutionPl
 
     @Bean
     public Service samlIdPCallbackService() {
-        final String service = casProperties.getServer().getPrefix()
+        val service = casProperties.getServer().getPrefix()
             .concat(SamlIdPConstants.ENDPOINT_SAML2_SSO_PROFILE_POST_CALLBACK.concat(".+"));
         return this.webApplicationServiceFactory.createService(service);
     }
 
     @Override
     public void configureServiceRegistry(final ServiceRegistryExecutionPlan plan) {
-        final Service callbackService = samlIdPCallbackService();
+        val callbackService = samlIdPCallbackService();
         LOGGER.debug("Initializing callback service [{}]", callbackService);
-        final RegexRegisteredService service = new RegexRegisteredService();
+        val service = new RegexRegisteredService();
         service.setId(Math.abs(RandomUtils.getNativeInstance().nextLong()));
         service.setEvaluationOrder(0);
         service.setName(service.getClass().getSimpleName());

@@ -2,7 +2,7 @@ package org.apereo.cas.authentication;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -12,11 +12,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author Marvin S. Addison
  * @since 4.0.0
  */
-@Slf4j
 @ToString
 public abstract class AbstractCredential implements Credential, CredentialMetaData {
 
-    /** Serialization version marker. */
+    /**
+     * Serialization version marker.
+     */
     private static final long serialVersionUID = 8196868021183513898L;
 
     @Override
@@ -30,14 +31,14 @@ public abstract class AbstractCredential implements Credential, CredentialMetaDa
         if (other == this) {
             return true;
         }
-        final EqualsBuilder builder = new EqualsBuilder();
+        val builder = new EqualsBuilder();
         builder.append(getId(), ((Credential) other).getId());
         return builder.isEquals();
     }
 
     @Override
     public int hashCode() {
-        final HashCodeBuilder builder = new HashCodeBuilder(11, 41);
+        val builder = new HashCodeBuilder(11, 41);
         builder.append(getClass().getName());
         builder.append(getId());
         return builder.toHashCode();

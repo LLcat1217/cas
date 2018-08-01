@@ -1,7 +1,5 @@
 package org.apereo.cas.logout.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.logout.DefaultLogoutExecutionPlan;
@@ -19,6 +17,10 @@ import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.util.http.HttpClient;
 import org.apereo.cas.web.UrlValidator;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,7 +42,6 @@ import java.util.List;
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 @Slf4j
 public class CasCoreLogoutConfiguration implements LogoutExecutionPlanConfigurer {
-
 
     @Autowired
     @Qualifier("ticketRegistry")
@@ -100,9 +101,9 @@ public class CasCoreLogoutConfiguration implements LogoutExecutionPlanConfigurer
     @Autowired
     @Bean
     public LogoutExecutionPlan logoutExecutionPlan(final List<LogoutExecutionPlanConfigurer> configurers) {
-        final DefaultLogoutExecutionPlan plan = new DefaultLogoutExecutionPlan();
+        val plan = new DefaultLogoutExecutionPlan();
         configurers.forEach(c -> {
-            final String name = StringUtils.removePattern(c.getClass().getSimpleName(), "\\$.+");
+            val name = StringUtils.removePattern(c.getClass().getSimpleName(), "\\$.+");
             LOGGER.debug("Configuring logout execution plan [{}]", name);
             c.configureLogoutExecutionPlan(plan);
         });

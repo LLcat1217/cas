@@ -5,6 +5,8 @@ import org.apereo.cas.clouddirectory.CloudDirectoryRepository;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {RefreshAutoConfiguration.class})
-@TestPropertySource(locations = { "classpath:/clouddirectory.properties" })
+@TestPropertySource(locations = {"classpath:/clouddirectory.properties"})
 @EnableConfigurationProperties(CasConfigurationProperties.class)
 public class CloudDirectoryAuthenticationHandlerTests {
     @Autowired
@@ -33,9 +35,9 @@ public class CloudDirectoryAuthenticationHandlerTests {
 
     @Test
     public void verifyAction() throws Exception {
-        final CloudDirectoryRepository repository = mock(CloudDirectoryRepository.class);
+        val repository = mock(CloudDirectoryRepository.class);
         when(repository.getUser(anyString())).thenReturn(CollectionUtils.wrap("username", "casuser", "password", "Mellon"));
-        final CloudDirectoryAuthenticationHandler h = new CloudDirectoryAuthenticationHandler("", mock(ServicesManager.class),
+        val h = new CloudDirectoryAuthenticationHandler("", mock(ServicesManager.class),
             PrincipalFactoryUtils.newPrincipalFactory(), repository, casProperties.getAuthn().getCloudDirectory());
         assertNotNull(h.authenticate(CoreAuthenticationTestUtils.getCredentialsWithDifferentUsernameAndPassword("casuser", "Mellon")));
     }

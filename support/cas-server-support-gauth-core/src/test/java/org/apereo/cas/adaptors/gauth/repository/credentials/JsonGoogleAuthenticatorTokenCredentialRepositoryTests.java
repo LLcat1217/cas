@@ -1,13 +1,13 @@
 package org.apereo.cas.adaptors.gauth.repository.credentials;
 
+import org.apereo.cas.CipherExecutor;
+import org.apereo.cas.config.CasCoreUtilConfiguration;
+
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
 import com.warrenstrange.googleauth.IGoogleAuthenticator;
-import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.io.FileUtils;
-import org.apereo.cas.CipherExecutor;
-import org.apereo.cas.config.CasCoreUtilConfiguration;
-import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,15 +32,14 @@ import static org.junit.Assert.*;
     AopAutoConfiguration.class,
     CasCoreUtilConfiguration.class
 })
-@Slf4j
 public class JsonGoogleAuthenticatorTokenCredentialRepositoryTests {
     private static final Resource JSON_FILE = new FileSystemResource(new File(FileUtils.getTempDirectoryPath(), "repository.json"));
 
     private IGoogleAuthenticator google;
 
     @Before
-    public void setup() {
-        final GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
+    public void initialize() {
+        val bldr = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
         this.google = new GoogleAuthenticator(bldr.build());
     }
 
@@ -49,9 +48,9 @@ public class JsonGoogleAuthenticatorTokenCredentialRepositoryTests {
         if (JSON_FILE.exists()) {
             FileUtils.forceDelete(JSON_FILE.getFile());
         }
-        final JsonGoogleAuthenticatorTokenCredentialRepository repo =
+        val repo =
             new JsonGoogleAuthenticatorTokenCredentialRepository(JSON_FILE, google, CipherExecutor.noOpOfStringToString());
-        final OneTimeTokenAccount acct = repo.create("casuser");
+        val acct = repo.create("casuser");
         assertNotNull(acct);
     }
 
@@ -60,9 +59,9 @@ public class JsonGoogleAuthenticatorTokenCredentialRepositoryTests {
         if (JSON_FILE.exists()) {
             FileUtils.forceDelete(JSON_FILE.getFile());
         }
-        final JsonGoogleAuthenticatorTokenCredentialRepository repo =
+        val repo =
             new JsonGoogleAuthenticatorTokenCredentialRepository(JSON_FILE, google, CipherExecutor.noOpOfStringToString());
-        OneTimeTokenAccount acct = repo.get("casuser");
+        var acct = repo.get("casuser");
         assertNull(acct);
         acct = repo.create("casuser");
         repo.save(acct.getUsername(), acct.getSecretKey(), acct.getValidationCode(), acct.getScratchCodes());

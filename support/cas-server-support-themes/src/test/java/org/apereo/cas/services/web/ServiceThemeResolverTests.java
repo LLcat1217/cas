@@ -1,6 +1,5 @@
 package org.apereo.cas.services.web;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.config.CasCoreAuthenticationPrincipalConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationServiceSelectionStrategyConfiguration;
@@ -19,6 +18,8 @@ import org.apereo.cas.services.RegisteredServiceTestUtils;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.services.web.config.CasThemesConfiguration;
 import org.apereo.cas.util.HttpRequestUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.webflow.core.collection.LocalAttributeMap;
-import org.springframework.webflow.core.collection.MutableAttributeMap;
 import org.springframework.webflow.execution.RequestContext;
 import org.springframework.webflow.execution.RequestContextHolder;
 
@@ -44,22 +44,21 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {CasThemesConfiguration.class,
-        CasCoreServicesConfiguration.class,
-        CasCoreTicketsConfiguration.class,
-        CasCoreTicketCatalogConfiguration.class,
-        CasCoreHttpConfiguration.class,
-        CasCoreLogoutConfiguration.class,
-        CasCoreWebConfiguration.class,
-        CasPersonDirectoryConfiguration.class,
-        CasCoreAuthenticationPrincipalConfiguration.class,
-        CasCoreAuthenticationServiceSelectionStrategyConfiguration.class,
-        CasWebApplicationServiceFactoryConfiguration.class,
-        CasCoreConfiguration.class,
-        CasCoreUtilConfiguration.class,
-        ThymeleafAutoConfiguration.class,
-        RefreshAutoConfiguration.class})
+    CasCoreServicesConfiguration.class,
+    CasCoreTicketsConfiguration.class,
+    CasCoreTicketCatalogConfiguration.class,
+    CasCoreHttpConfiguration.class,
+    CasCoreLogoutConfiguration.class,
+    CasCoreWebConfiguration.class,
+    CasPersonDirectoryConfiguration.class,
+    CasCoreAuthenticationPrincipalConfiguration.class,
+    CasCoreAuthenticationServiceSelectionStrategyConfiguration.class,
+    CasWebApplicationServiceFactoryConfiguration.class,
+    CasCoreConfiguration.class,
+    CasCoreUtilConfiguration.class,
+    ThymeleafAutoConfiguration.class,
+    RefreshAutoConfiguration.class})
 @TestPropertySource(locations = {"classpath:/castheme.properties"})
-@Slf4j
 public class ServiceThemeResolverTests {
 
     private static final String MOZILLA = "Mozilla";
@@ -75,7 +74,7 @@ public class ServiceThemeResolverTests {
 
     @Test
     public void verifyGetServiceThemeDoesNotExist() {
-        final RegexRegisteredService r = new RegexRegisteredService();
+        val r = new RegexRegisteredService();
         r.setTheme("myTheme");
         r.setId(1000);
         r.setName("Test Service");
@@ -83,9 +82,9 @@ public class ServiceThemeResolverTests {
 
         this.servicesManager.save(r);
 
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        final RequestContext ctx = mock(RequestContext.class);
-        final MutableAttributeMap scope = new LocalAttributeMap();
+        val request = new MockHttpServletRequest();
+        val ctx = mock(RequestContext.class);
+        val scope = new LocalAttributeMap();
         scope.put(CasProtocolConstants.PARAMETER_SERVICE, RegisteredServiceTestUtils.getService(r.getServiceId()));
         when(ctx.getFlowScope()).thenReturn(scope);
         RequestContextHolder.setRequestContext(ctx);
@@ -95,7 +94,7 @@ public class ServiceThemeResolverTests {
 
     @Test
     public void verifyGetDefaultService() {
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val request = new MockHttpServletRequest();
         request.setParameter(CasProtocolConstants.PARAMETER_SERVICE, "myServiceId");
         request.addHeader(HttpRequestUtils.USER_AGENT_HEADER, MOZILLA);
         assertEquals(DEFAULT_THEME_NAME, this.themeResolver.resolveThemeName(request));

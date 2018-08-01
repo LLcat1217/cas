@@ -1,13 +1,13 @@
 package org.apereo.cas.monitor;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.support.EnvironmentConversionServiceInitializer;
 import org.apereo.cas.configuration.CasConfigurationProperties;
+
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +32,6 @@ import static org.junit.Assert.*;
 @SpringBootTest(classes = {RefreshAutoConfiguration.class})
 @ContextConfiguration(initializers = EnvironmentConversionServiceInitializer.class)
 @EnableConfigurationProperties(CasConfigurationProperties.class)
-@Slf4j
 public class JdbcDataSourceHealthIndicatorTests {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -42,17 +41,17 @@ public class JdbcDataSourceHealthIndicatorTests {
     private DataSource dataSource;
 
     @Before
-    public void setUp() {
-        final ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:/jpaTestApplicationContext.xml");
+    public void initialize() {
+        val ctx = new ClassPathXmlApplicationContext("classpath:/jpaTestApplicationContext.xml");
         this.dataSource = ctx.getBean("dataSource", DataSource.class);
     }
 
     @Test
     public void verifyObserve() {
-        final JdbcDataSourceHealthIndicator monitor = new JdbcDataSourceHealthIndicator(5000,
+        val monitor = new JdbcDataSourceHealthIndicator(5000,
             this.dataSource, this.executor,
             "SELECT 1 FROM INFORMATION_SCHEMA.SYSTEM_USERS");
-        final Health status = monitor.health();
+        val status = monitor.health();
         assertEquals(Status.UP, status.getStatus());
     }
 }

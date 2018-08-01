@@ -1,10 +1,9 @@
 package org.apereo.cas.support.saml;
 
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.opensaml.saml.metadata.resolver.impl.DOMMetadataResolver;
 import org.springframework.core.io.Resource;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.File;
@@ -18,7 +17,6 @@ import java.nio.file.Files;
  * @author Misagh Moayyed
  * @since 5.2.0
  */
-@Slf4j
 public class InMemoryResourceMetadataResolver extends DOMMetadataResolver {
 
     public InMemoryResourceMetadataResolver(final Resource metadataResource, final OpenSamlConfigBean configBean) throws IOException {
@@ -35,7 +33,7 @@ public class InMemoryResourceMetadataResolver extends DOMMetadataResolver {
 
     @SneakyThrows
     private static Element getMetadataRootElement(final InputStream metadataResource, final OpenSamlConfigBean configBean) {
-        final Document document = configBean.getParserPool().parse(metadataResource);
+        val document = configBean.getParserPool().parse(metadataResource);
         return document.getDocumentElement();
     }
 }

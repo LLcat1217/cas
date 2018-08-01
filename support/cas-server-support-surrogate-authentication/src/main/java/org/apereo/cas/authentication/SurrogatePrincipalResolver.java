@@ -1,9 +1,11 @@
 package org.apereo.cas.authentication;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.principal.Principal;
 import org.apereo.cas.authentication.principal.PrincipalFactory;
 import org.apereo.cas.authentication.principal.resolvers.PersonDirectoryPrincipalResolver;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apereo.services.persondir.IPersonAttributeDao;
 
 import java.util.Optional;
@@ -40,7 +42,7 @@ public class SurrogatePrincipalResolver extends PersonDirectoryPrincipalResolver
         if (currentPrincipal == null || !currentPrincipal.isPresent()) {
             throw new IllegalArgumentException("Current principal resolved cannot be null");
         }
-        final String id = currentPrincipal.get().getId();
+        val id = currentPrincipal.get().getId();
         LOGGER.debug("Resolving principal id for surrogate authentication as [{}]", id);
         return id;
     }

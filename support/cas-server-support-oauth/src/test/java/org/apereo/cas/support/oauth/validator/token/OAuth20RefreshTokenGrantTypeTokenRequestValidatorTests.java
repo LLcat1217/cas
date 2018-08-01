@@ -7,6 +7,8 @@ import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.authenticator.Authenticators;
 import org.apereo.cas.ticket.refreshtoken.RefreshToken;
 import org.apereo.cas.ticket.registry.TicketRegistry;
+
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.pac4j.core.context.J2EContext;
@@ -15,10 +17,7 @@ import org.pac4j.core.profile.CommonProfile;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import javax.servlet.http.HttpSession;
-
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -33,7 +32,7 @@ public class OAuth20RefreshTokenGrantTypeTokenRequestValidatorTests {
 
     @Before
     public void before() {
-        final RefreshToken oauthCode = mock(RefreshToken.class);
+        val oauthCode = mock(RefreshToken.class);
         when(oauthCode.getId()).thenReturn("RT-12345678");
         when(oauthCode.isExpired()).thenReturn(false);
         when(oauthCode.getAuthentication()).thenReturn(RegisteredServiceTestUtils.getAuthentication());
@@ -47,15 +46,15 @@ public class OAuth20RefreshTokenGrantTypeTokenRequestValidatorTests {
 
     @Test
     public void verifyOperation() {
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val request = new MockHttpServletRequest();
 
-        final CommonProfile profile = new CommonProfile();
+        val profile = new CommonProfile();
         profile.setClientName(Authenticators.CAS_OAUTH_CLIENT_BASIC_AUTHN);
         profile.setId("client");
-        final HttpSession session = request.getSession(true);
+        val session = request.getSession(true);
         session.setAttribute(Pac4jConstants.USER_PROFILES, profile);
-        
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+
+        val response = new MockHttpServletResponse();
         request.setParameter(OAuth20Constants.GRANT_TYPE, OAuth20GrantTypes.REFRESH_TOKEN.getType());
         request.setParameter(OAuth20Constants.CLIENT_ID, "client");
         request.setParameter(OAuth20Constants.CLIENT_SECRET, "secret");

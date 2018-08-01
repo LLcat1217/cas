@@ -1,21 +1,21 @@
 package org.apereo.cas.web.view;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.CasProtocolConstants;
 import org.apereo.cas.authentication.AuthenticationAttributeReleasePolicy;
 import org.apereo.cas.authentication.AuthenticationServiceSelectionPlan;
 import org.apereo.cas.authentication.ProtocolAttributeEncoder;
-import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.validation.CasProtocolAttributesRenderer;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,18 +54,16 @@ public class Cas30ResponseView extends Cas20ResponseView {
                                             final HttpServletResponse response) throws Exception {
         super.prepareMergedOutputModel(model, request, response);
 
-        final Service service = authenticationRequestServiceSelectionStrategies.resolveService(getServiceFrom(model));
-        final RegisteredService registeredService = this.servicesManager.findServiceBy(service);
+        val service = authenticationRequestServiceSelectionStrategies.resolveService(getServiceFrom(model));
+        val registeredService = this.servicesManager.findServiceBy(service);
 
-        final Map<String, Object> attributes = new HashMap<>();
-
-        final Map<String, Object> principalAttributes = getCasPrincipalAttributes(model, registeredService);
-        attributes.putAll(principalAttributes);
+        val principalAttributes = getCasPrincipalAttributes(model, registeredService);
+        val attributes = new HashMap<String, Object>(principalAttributes);
 
         LOGGER.debug("Processed principal attributes from the output model to be [{}]", principalAttributes.keySet());
         if (this.releaseProtocolAttributes) {
             LOGGER.debug("CAS is configured to release protocol-level attributes. Processing...");
-            final Map<String, Object> protocolAttributes = getCasProtocolAuthenticationAttributes(model, registeredService);
+            val protocolAttributes = getCasProtocolAuthenticationAttributes(model, registeredService);
             attributes.putAll(protocolAttributes);
             LOGGER.debug("Processed protocol/authentication attributes from the output model to be [{}]", protocolAttributes.keySet());
         }
@@ -92,12 +90,12 @@ public class Cas30ResponseView extends Cas20ResponseView {
             return new LinkedHashMap<>(0);
         }
 
-        final Map<String, Object> filteredAuthenticationAttributes = authenticationAttributeReleasePolicy
+        val filteredAuthenticationAttributes = authenticationAttributeReleasePolicy
             .getAuthenticationAttributesForRelease(getPrimaryAuthenticationFrom(model));
 
         filterCasProtocolAttributes(model, filteredAuthenticationAttributes);
 
-        final String contextProvider = getSatisfiedMultifactorAuthenticationProviderId(model);
+        val contextProvider = getSatisfiedMultifactorAuthenticationProviderId(model);
         if (StringUtils.isNotBlank(contextProvider) && StringUtils.isNotBlank(authenticationContextAttribute)) {
             filteredAuthenticationAttributes.put(this.authenticationContextAttribute, CollectionUtils.wrap(contextProvider));
         }
@@ -137,12 +135,12 @@ public class Cas30ResponseView extends Cas20ResponseView {
                                                      final RegisteredService registeredService) {
 
         LOGGER.debug("Beginning to encode attributes for the response");
-        final Map<String, Object> encodedAttributes = this.protocolAttributeEncoder.encodeAttributes(attributes, registeredService);
+        val encodedAttributes = this.protocolAttributeEncoder.encodeAttributes(attributes, registeredService);
 
         LOGGER.debug("Encoded attributes for the response are [{}]", encodedAttributes);
         super.putIntoModel(model, CasProtocolConstants.VALIDATION_CAS_MODEL_ATTRIBUTE_NAME_ATTRIBUTES, encodedAttributes);
 
-        final Collection<String> formattedAttributes = this.attributesRenderer.render(encodedAttributes);
+        val formattedAttributes = this.attributesRenderer.render(encodedAttributes);
         super.putIntoModel(model, CasProtocolConstants.VALIDATION_CAS_MODEL_ATTRIBUTE_NAME_FORMATTED_ATTRIBUTES, formattedAttributes);
     }
 }

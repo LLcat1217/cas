@@ -1,13 +1,13 @@
 package org.apereo.cas.authentication;
 
-import lombok.extern.slf4j.Slf4j;
-import javax.annotation.Nonnull;
+import lombok.Setter;
+import lombok.val;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import lombok.Setter;
 
 /**
  * Default AuthenticationAttributeReleasePolicy implementation.
@@ -15,13 +15,11 @@ import lombok.Setter;
  * @author Daniel Frett
  * @since 5.2.0
  */
-@Slf4j
 @Setter
 public class DefaultAuthenticationAttributeReleasePolicy implements AuthenticationAttributeReleasePolicy {
 
     private Collection<String> attributesToRelease;
 
-    @Nonnull
     private Set<String> attributesToNeverRelease = new HashSet<>();
 
     /**
@@ -42,8 +40,8 @@ public class DefaultAuthenticationAttributeReleasePolicy implements Authenticati
      * @return The attributes to be released
      */
     @Override
-    public Map<String, Object> getAuthenticationAttributesForRelease(@Nonnull final Authentication authentication) {
-        final HashMap<String, Object> attrs = new HashMap<>(authentication.getAttributes());
+    public Map<String, Object> getAuthenticationAttributesForRelease(final Authentication authentication) {
+        val attrs = new HashMap<String, Object>(authentication.getAttributes());
         // remove any attributes explicitly prohibited
         attrs.keySet().removeAll(attributesToNeverRelease);
         // only apply whitelist if it contains attributes

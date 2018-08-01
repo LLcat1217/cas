@@ -1,12 +1,12 @@
 package org.apereo.cas.audit.spi;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.AuditPrincipalIdProvider;
 import org.apereo.cas.authentication.Authentication;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
-import java.util.ArrayList;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 import java.util.List;
 
 /**
@@ -16,11 +16,10 @@ import java.util.List;
  * @since 5.3.0
  */
 @Getter
-@Slf4j
+@RequiredArgsConstructor
 public class ChainingAuditPrincipalIdProvider implements AuditPrincipalIdProvider {
+    private final List<AuditPrincipalIdProvider> providers;
     private int order = Integer.MAX_VALUE;
-
-    private List<AuditPrincipalIdProvider> providers = new ArrayList<>();
 
     /**
      * Add provider.
@@ -31,13 +30,21 @@ public class ChainingAuditPrincipalIdProvider implements AuditPrincipalIdProvide
         providers.add(provider);
     }
 
+    /**
+     * Add providers.
+     *
+     * @param provider the provider
+     */
+    public void addProviders(final List<AuditPrincipalIdProvider> provider) {
+        providers.addAll(provider);
+    }
+
     @Override
     public String getPrincipalIdFrom(final Authentication authentication, final Object resultValue, final Exception exception) {
-        AnnotationAwareOrderComparator.sort(this.providers);
-        final AuditPrincipalIdProvider result = providers.stream()
+        val result = providers.stream()
             .filter(p -> p.supports(authentication, resultValue, exception))
             .findFirst()
-            .orElse(new DefaultAuditPrincipalIdProvider());
+            .orElseGet(DefaultAuditPrincipalIdProvider::new);
         return result.getPrincipalIdFrom(authentication, resultValue, exception);
     }
 

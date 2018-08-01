@@ -1,7 +1,5 @@
 package org.apereo.cas.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.authentication.AcceptUsersAuthenticationHandler;
 import org.apereo.cas.authentication.AuthenticationEventExecutionPlanConfigurer;
 import org.apereo.cas.authentication.AuthenticationHandler;
@@ -17,10 +15,12 @@ import org.apereo.cas.authentication.principal.resolvers.ProxyingPrincipalResolv
 import org.apereo.cas.authentication.support.password.PasswordEncoderUtils;
 import org.apereo.cas.authentication.support.password.PasswordPolicyConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
-import org.apereo.cas.configuration.model.core.authentication.PasswordPolicyProperties;
-import org.apereo.cas.configuration.model.support.generic.AcceptAuthenticationProperties;
 import org.apereo.cas.services.ServicesManager;
 import org.apereo.cas.util.http.HttpClient;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.services.persondir.IPersonAttributeDao;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +60,6 @@ public class CasCoreAuthenticationHandlersConfiguration {
     @Qualifier("supportsTrustStoreSslSocketFactoryHttpClient")
     private HttpClient supportsTrustStoreSslSocketFactoryHttpClient;
 
-    @Autowired(required = false)
-    @Qualifier("acceptPasswordPolicyConfiguration")
-    private PasswordPolicyConfiguration acceptPasswordPolicyConfiguration;
-
     @Autowired
     @Qualifier("servicesManager")
     private ServicesManager servicesManager;
@@ -91,15 +87,24 @@ public class CasCoreAuthenticationHandlersConfiguration {
     @RefreshScope
     @Bean
     public AuthenticationHandler acceptUsersAuthenticationHandler() {
-        final AcceptAuthenticationProperties props = casProperties.getAuthn().getAccept();
-        final AcceptUsersAuthenticationHandler h = new AcceptUsersAuthenticationHandler(props.getName(), servicesManager,
+        val props = casProperties.getAuthn().getAccept();
+        val h = new AcceptUsersAuthenticationHandler(props.getName(), servicesManager,
             acceptUsersPrincipalFactory(), null, getParsedUsers());
         h.setPasswordEncoder(PasswordEncoderUtils.newPasswordEncoder(props.getPasswordEncoder()));
-        if (acceptPasswordPolicyConfiguration != null) {
-            h.setPasswordPolicyConfiguration(acceptPasswordPolicyConfiguration);
-        }
+        h.setPasswordPolicyConfiguration(acceptPasswordPolicyConfiguration());
         h.setCredentialSelectionPredicate(CoreAuthenticationUtils.newCredentialSelectionPredicate(props.getCredentialCriteria()));
         h.setPrincipalNameTransformer(PrincipalNameTransformerUtils.newPrincipalNameTransformer(props.getPrincipalTransformation()));
+        val passwordPolicy = props.getPasswordPolicy();
+        h.setPasswordPolicyHandlingStrategy(CoreAuthenticationUtils.newPasswordPolicyHandlingStrategy(passwordPolicy));
+        if (passwordPolicy.isEnabled()) {
+            val cfg = new PasswordPolicyConfiguration(passwordPolicy);
+            if (passwordPolicy.isAccountStateHandlingEnabled()) {
+                cfg.setAccountStateHandler((response, configuration) -> new ArrayList<>(0));
+            } else {
+                LOGGER.debug("Handling account states is disabled via CAS configuration");
+            }
+            h.setPasswordPolicyConfiguration(cfg);
+        }
         return h;
     }
 
@@ -110,8 +115,8 @@ public class CasCoreAuthenticationHandlersConfiguration {
     }
 
     private Map<String, String> getParsedUsers() {
-        final Pattern pattern = Pattern.compile("::");
-        final String usersProperty = casProperties.getAuthn().getAccept().getUsers();
+        val pattern = Pattern.compile("::");
+        val usersProperty = casProperties.getAuthn().getAccept().getUsers();
 
         if (StringUtils.isNotBlank(usersProperty) && usersProperty.contains(pattern.pattern())) {
             return Stream.of(usersProperty.split(","))
@@ -126,6 +131,18 @@ public class CasCoreAuthenticationHandlersConfiguration {
     @ConditionalOnProperty(prefix = "cas.sso", name = "proxyAuthnEnabled", havingValue = "true", matchIfMissing = true)
     public AuthenticationEventExecutionPlanConfigurer proxyAuthenticationEventExecutionPlanConfigurer() {
         return plan -> plan.registerAuthenticationHandlerWithPrincipalResolver(proxyAuthenticationHandler(), proxyPrincipalResolver());
+    }
+
+    @ConditionalOnMissingBean(name = "acceptPasswordPolicyConfiguration")
+    @Bean
+    public PasswordPolicyConfiguration acceptPasswordPolicyConfiguration() {
+        return new PasswordPolicyConfiguration();
+    }
+
+    @ConditionalOnMissingBean(name = "jaasPasswordPolicyConfiguration")
+    @Bean
+    public PasswordPolicyConfiguration jaasPasswordPolicyConfiguration() {
+        return new PasswordPolicyConfiguration();
     }
 
     /**
@@ -166,7 +183,7 @@ public class CasCoreAuthenticationHandlersConfiguration {
                 .stream()
                 .filter(jaas -> StringUtils.isNotBlank(jaas.getRealm()))
                 .map(jaas -> {
-                    final JaasAuthenticationHandler h = new JaasAuthenticationHandler(jaas.getName(), servicesManager,
+                    val h = new JaasAuthenticationHandler(jaas.getName(), servicesManager,
                         jaasPrincipalFactory(), jaas.getOrder());
 
                     h.setKerberosKdcSystemProperty(jaas.getKerberosKdcSystemProperty());
@@ -180,12 +197,11 @@ public class CasCoreAuthenticationHandlersConfiguration {
                     if (StringUtils.isNotBlank(jaas.getLoginConfigurationFile())) {
                         h.setLoginConfigurationFile(new File(jaas.getLoginConfigurationFile()));
                     }
-
-                    final PasswordPolicyProperties passwordPolicy = jaas.getPasswordPolicy();
-                    h.setPasswordPolicyHandlingStrategy(CoreAuthenticationUtils.newPasswordPolicyHandlingStrategy(jaas.getPasswordPolicy()));
+                    val passwordPolicy = jaas.getPasswordPolicy();
+                    h.setPasswordPolicyHandlingStrategy(CoreAuthenticationUtils.newPasswordPolicyHandlingStrategy(passwordPolicy));
                     if (passwordPolicy.isEnabled()) {
                         LOGGER.debug("Password policy is enabled for JAAS. Constructing password policy configuration for [{}]", jaas.getRealm());
-                        final PasswordPolicyConfiguration cfg = new PasswordPolicyConfiguration(passwordPolicy);
+                        val cfg = new PasswordPolicyConfiguration(passwordPolicy);
                         if (passwordPolicy.isAccountStateHandlingEnabled()) {
                             cfg.setAccountStateHandler((response, configuration) -> new ArrayList<>(0));
                         } else {

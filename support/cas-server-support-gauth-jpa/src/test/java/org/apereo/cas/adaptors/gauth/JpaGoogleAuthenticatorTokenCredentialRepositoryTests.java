@@ -1,6 +1,5 @@
 package org.apereo.cas.adaptors.gauth;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationMetadataConfiguration;
@@ -22,14 +21,17 @@ import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguratio
 import org.apereo.cas.config.support.EnvironmentConversionServiceInitializer;
 import org.apereo.cas.config.support.authentication.GoogleAuthenticatorAuthenticationEventExecutionPlanConfiguration;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
-import org.apereo.cas.authentication.OneTimeTokenAccount;
 import org.apereo.cas.otp.repository.credentials.OneTimeTokenCredentialRepository;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.SchedulingUtils;
+
+import lombok.val;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
@@ -42,8 +44,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import javax.annotation.PostConstruct;
 
 import static org.junit.Assert.*;
 
@@ -83,7 +83,6 @@ import static org.junit.Assert.*;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableScheduling
 @ContextConfiguration(initializers = EnvironmentConversionServiceInitializer.class)
-@Slf4j
 public class JpaGoogleAuthenticatorTokenCredentialRepositoryTests {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -92,28 +91,24 @@ public class JpaGoogleAuthenticatorTokenCredentialRepositoryTests {
     @Qualifier("googleAuthenticatorAccountRegistry")
     private OneTimeTokenCredentialRepository registry;
 
-    @TestConfiguration
-    public static class JpaTestConfiguration {
-        @Autowired
-        protected ApplicationContext applicationContext;
-
-        @PostConstruct
-        public void init() {
-            SchedulingUtils.prepScheduledAnnotationBeanPostProcessor(applicationContext);
-        }
+    @Before
+    public void cleanUp() {
+        registry.deleteAll();
     }
 
     @Test
     public void verifySave() {
         registry.save("uid", "secret", 143211, CollectionUtils.wrapList(1, 2, 3, 4, 5, 6));
-        final OneTimeTokenAccount s = registry.get("uid");
+        val s = registry.get("uid");
         assertEquals("secret", s.getSecretKey());
+        val c = registry.load();
+        assertFalse(c.isEmpty());
     }
 
     @Test
     public void verifySaveAndUpdate() {
         registry.save("casuser", "secret", 111222, CollectionUtils.wrapList(1, 2, 3, 4, 5, 6));
-        OneTimeTokenAccount s = registry.get("casuser");
+        var s = registry.get("casuser");
         assertNotNull(s.getRegistrationDate());
         assertEquals(111222, s.getValidationCode());
         assertEquals("secret", s.getSecretKey());
@@ -123,5 +118,16 @@ public class JpaGoogleAuthenticatorTokenCredentialRepositoryTests {
         s = registry.get("casuser");
         assertEquals(999666, s.getValidationCode());
         assertEquals("newSecret", s.getSecretKey());
+    }
+
+    @TestConfiguration
+    public static class JpaTestConfiguration implements InitializingBean {
+        @Autowired
+        protected ApplicationContext applicationContext;
+
+        @Override
+        public void afterPropertiesSet() {
+            SchedulingUtils.prepScheduledAnnotationBeanPostProcessor(applicationContext);
+        }
     }
 }

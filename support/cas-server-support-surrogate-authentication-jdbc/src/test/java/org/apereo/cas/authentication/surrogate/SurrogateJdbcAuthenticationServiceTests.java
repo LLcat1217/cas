@@ -2,8 +2,6 @@ package org.apereo.cas.authentication.surrogate;
 
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
-import org.apereo.cas.authentication.principal.Principal;
-import org.apereo.cas.authentication.principal.Service;
 import org.apereo.cas.config.CasCoreAuthenticationConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationHandlersConfiguration;
 import org.apereo.cas.config.CasCoreAuthenticationMetadataConfiguration;
@@ -20,6 +18,8 @@ import org.apereo.cas.config.CasCoreWebConfiguration;
 import org.apereo.cas.config.CasPersonDirectoryConfiguration;
 import org.apereo.cas.config.SurrogateJdbcAuthenticationConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
+
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +32,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.sql.DataSource;
-import java.util.Collection;
 
 import static org.junit.Assert.*;
 
@@ -89,15 +88,15 @@ public class SurrogateJdbcAuthenticationServiceTests {
 
     @Test
     public void verifyAccountsQualifying() {
-        final Collection results = surrogateAuthenticationService.getEligibleAccountsForSurrogateToProxy("casuser");
+        val results = surrogateAuthenticationService.getEligibleAccountsForSurrogateToProxy("casuser");
         assertFalse(results.isEmpty());
         assertEquals(3, results.size());
     }
 
     @Test
     public void verifyAccountQualifying() {
-        final Principal casuser = CoreAuthenticationTestUtils.getPrincipal("casuser");
-        final Service service = CoreAuthenticationTestUtils.getService();
+        val casuser = CoreAuthenticationTestUtils.getPrincipal("casuser");
+        val service = CoreAuthenticationTestUtils.getService();
         assertTrue(surrogateAuthenticationService.canAuthenticateAs("surrogate1", casuser, service));
         assertTrue(surrogateAuthenticationService.canAuthenticateAs("surrogate2", casuser, service));
         assertTrue(surrogateAuthenticationService.canAuthenticateAs("surrogate3", casuser, service));

@@ -1,23 +1,24 @@
 package org.apereo.cas.web.support;
 
+import org.apereo.cas.CasProtocolConstants;
+import org.apereo.cas.audit.AuditTrailExecutionPlan;
+import org.apereo.cas.util.DateTimeUtils;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.HttpStatus;
-import org.apereo.cas.CasProtocolConstants;
-import org.apereo.cas.audit.AuditTrailExecutionPlan;
-import org.apereo.cas.util.DateTimeUtils;
 import org.apereo.inspektr.audit.AuditActionContext;
-import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.ZoneOffset;
@@ -35,7 +36,8 @@ import java.util.List;
 @ToString
 @Getter
 @RequiredArgsConstructor
-public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter extends HandlerInterceptorAdapter implements ThrottledSubmissionHandlerInterceptor {
+public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter extends HandlerInterceptorAdapter
+    implements ThrottledSubmissionHandlerInterceptor, InitializingBean {
     /**
      * Throttled login attempt action code used to tag the attempt in audit records.
      */
@@ -51,21 +53,17 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
     private final int failureRangeInSeconds;
 
     private final String usernameParameter;
-
-    private double thresholdRate = -1;
-
     private final String authenticationFailureCode;
-
     private final AuditTrailExecutionPlan auditTrailExecutionPlan;
-
     private final String applicationCode;
+    private double thresholdRate = -1;
 
     /**
      * Configure the threshold rate.
      */
-    @PostConstruct
+    @Override
     public void afterPropertiesSet() {
-        this.thresholdRate = this.failureThreshold / this.failureRangeInSeconds;
+        this.thresholdRate = ((double) this.failureThreshold) / this.failureRangeInSeconds;
         LOGGER.debug("Calculated threshold rate as [{}]", this.thresholdRate);
     }
 
@@ -79,9 +77,12 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
         if (exceedsThreshold(request)) {
             recordThrottle(request);
             request.setAttribute(WebUtils.CAS_ACCESS_DENIED_REASON, "screen.blocked.message");
+            val username = StringUtils.isNotBlank(this.usernameParameter)
+                ? StringUtils.defaultString(request.getParameter(this.usernameParameter), "N/A")
+                : "N/A";
             response.sendError(HttpStatus.SC_LOCKED, "Access Denied for user ["
-                + StringEscapeUtils.escapeHtml4(request.getParameter(this.usernameParameter))
-                + "] from IP Address [" + request.getRemoteAddr() + ']');
+                + StringEscapeUtils.escapeHtml4(username) + "] from IP Address ["
+                + request.getRemoteAddr() + ']');
             return false;
         }
         return true;
@@ -93,7 +94,7 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
             LOGGER.trace("Skipping authentication throttling for requests other than POST");
             return;
         }
-        final boolean recordEvent = shouldResponseBeRecordedAsFailure(response);
+        val recordEvent = shouldResponseBeRecordedAsFailure(response);
         if (recordEvent) {
             LOGGER.debug("Recording submission failure for [{}]", request.getRequestURI());
             recordSubmissionFailure(request);
@@ -110,7 +111,7 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
      * @return the boolean
      */
     protected boolean shouldResponseBeRecordedAsFailure(final HttpServletResponse response) {
-        final int status = response.getStatus();
+        val status = response.getStatus();
         return status != HttpStatus.SC_CREATED && status != HttpStatus.SC_OK && status != HttpStatus.SC_MOVED_TEMPORARILY;
     }
 
@@ -141,10 +142,10 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
         if (failures.size() < 2) {
             return false;
         }
-        final long lastTime = failures.get(0).getTime();
-        final long secondToLastTime = failures.get(1).getTime();
-        final long difference = lastTime - secondToLastTime;
-        final double rate = NUMBER_OF_MILLISECONDS_IN_SECOND / difference;
+        val lastTime = failures.get(0).getTime();
+        val secondToLastTime = failures.get(1).getTime();
+        val difference = lastTime - secondToLastTime;
+        val rate = NUMBER_OF_MILLISECONDS_IN_SECOND / difference;
         LOGGER.debug("Last attempt was at [{}] and the one before that was at [{}]. Difference is [{}] calculated as rate of [{}]",
             lastTime, secondToLastTime, difference, rate);
         if (rate > getThresholdRate()) {
@@ -170,7 +171,7 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
      * @return the failure in range cut off date
      */
     protected Date getFailureInRangeCutOffDate() {
-        final ZonedDateTime cutoff = ZonedDateTime.now(ZoneOffset.UTC).minusSeconds(getFailureRangeInSeconds());
+        val cutoff = ZonedDateTime.now(ZoneOffset.UTC).minusSeconds(getFailureRangeInSeconds());
         return DateTimeUtils.timestampOf(cutoff);
     }
 
@@ -181,10 +182,10 @@ public abstract class AbstractThrottledSubmissionHandlerInterceptorAdapter exten
      * @param actionName Name of the action to be recorded.
      */
     protected void recordAuditAction(final HttpServletRequest request, final String actionName) {
-        final String userToUse = getUsernameParameterFromRequest(request);
-        final ClientInfo clientInfo = ClientInfoHolder.getClientInfo();
-        final String resource = StringUtils.defaultString(request.getParameter(CasProtocolConstants.PARAMETER_SERVICE), "N/A");
-        final AuditActionContext context = new AuditActionContext(
+        val userToUse = getUsernameParameterFromRequest(request);
+        val clientInfo = ClientInfoHolder.getClientInfo();
+        val resource = StringUtils.defaultString(request.getParameter(CasProtocolConstants.PARAMETER_SERVICE), "N/A");
+        val context = new AuditActionContext(
             userToUse,
             resource,
             actionName,

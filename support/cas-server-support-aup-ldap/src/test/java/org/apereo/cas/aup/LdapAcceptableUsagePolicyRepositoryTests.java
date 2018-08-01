@@ -1,9 +1,7 @@
 package org.apereo.cas.aup;
 
-import com.unboundid.ldap.sdk.LDAPConnection;
 import org.apereo.cas.adaptors.ldap.LdapIntegrationTestsOperations;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
-import org.apereo.cas.authentication.Credential;
 import org.apereo.cas.category.LdapCategory;
 import org.apereo.cas.config.CasAcceptableUsagePolicyLdapConfiguration;
 import org.apereo.cas.config.CasAuthenticationEventExecutionPlanTestConfiguration;
@@ -23,13 +21,16 @@ import org.apereo.cas.config.CasRegisteredServicesTestConfiguration;
 import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
 import org.apereo.cas.mock.MockTicketGrantingTicket;
-import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.util.CollectionUtils;
 import org.apereo.cas.util.junit.ConditionalIgnore;
 import org.apereo.cas.util.junit.ConditionalIgnoreRule;
 import org.apereo.cas.util.junit.RunningContinuousIntegrationCondition;
 import org.apereo.cas.web.support.WebUtils;
+
+import com.unboundid.ldap.sdk.LDAPConnection;
+import lombok.SneakyThrows;
+import lombok.val;
 import org.apereo.inspektr.common.web.ClientInfo;
 import org.apereo.inspektr.common.web.ClientInfoHolder;
 import org.junit.BeforeClass;
@@ -50,8 +51,6 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.webflow.context.servlet.ServletExternalContext;
 import org.springframework.webflow.test.MockRequestContext;
-
-import lombok.SneakyThrows;
 
 import static org.junit.Assert.*;
 
@@ -105,27 +104,27 @@ public class LdapAcceptableUsagePolicyRepositoryTests {
     @Qualifier("ticketRegistry")
     private TicketRegistry ticketRegistry;
 
+    @BeforeClass
+    @SneakyThrows
+    public static void bootstrap() {
+        ClientInfoHolder.setClientInfo(new ClientInfo(new MockHttpServletRequest()));
+        val localhost = new LDAPConnection("localhost", LDAP_PORT, "cn=Directory Manager", "password");
+        LdapIntegrationTestsOperations.populateEntries(localhost,
+            new ClassPathResource("ldif/ldap-aup.ldif").getInputStream(), "ou=people,dc=example,dc=org");
+    }
+
     @Test
     public void verifyAction() {
-        final MockRequestContext context = new MockRequestContext();
-        final MockHttpServletRequest request = new MockHttpServletRequest();
+        val context = new MockRequestContext();
+        val request = new MockHttpServletRequest();
         context.setExternalContext(new ServletExternalContext(new MockServletContext(), request, new MockHttpServletResponse()));
 
-        final Credential c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casaup");
-        final TicketGrantingTicket tgt = new MockTicketGrantingTicket("casaup", c, CollectionUtils.wrap("carLicense", "false"));
+        val c = CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casaup");
+        val tgt = new MockTicketGrantingTicket("casaup", c, CollectionUtils.wrap("carLicense", "false"));
         ticketRegistry.addTicket(tgt);
         WebUtils.putTicketGrantingTicketInScopes(context, tgt);
 
         assertFalse(acceptableUsagePolicyRepository.verify(context, c).getLeft());
         assertTrue(acceptableUsagePolicyRepository.submit(context, c));
-    }
-
-    @BeforeClass
-    @SneakyThrows
-    public static void bootstrap() {
-        ClientInfoHolder.setClientInfo(new ClientInfo(new MockHttpServletRequest()));
-        final LDAPConnection localhost = new LDAPConnection("localhost", LDAP_PORT, "cn=Directory Manager", "password");
-        LdapIntegrationTestsOperations.populateEntries(localhost,
-            new ClassPathResource("ldif/ldap-aup.ldif").getInputStream(), "ou=people,dc=example,dc=org");
     }
 }

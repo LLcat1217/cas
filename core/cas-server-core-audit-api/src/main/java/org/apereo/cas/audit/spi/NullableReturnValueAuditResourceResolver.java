@@ -1,7 +1,7 @@
 package org.apereo.cas.audit.spi;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apereo.inspektr.audit.spi.AuditResourceResolver;
@@ -16,8 +16,7 @@ import java.util.Date;
  * @author Misagh Moayyed
  * @since 5.2.0
  */
-@Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class NullableReturnValueAuditResourceResolver implements AuditResourceResolver {
     private final AuditResourceResolver delegate;
 
@@ -27,15 +26,15 @@ public class NullableReturnValueAuditResourceResolver implements AuditResourceRe
             return new String[0];
         }
         if (o instanceof Event) {
-            final Event event = Event.class.cast(o);
+            val event = Event.class.cast(o);
 
-            final String sourceName = event.getSource().getClass().getSimpleName();
-            final String result =
-                    new ToStringBuilder(event, ToStringStyle.NO_CLASS_NAME_STYLE)
-                            .append("event", event.getId())
-                            .append("timestamp", new Date(event.getTimestamp()))
-                            .append("source", sourceName)
-                            .toString();
+            val sourceName = event.getSource().getClass().getSimpleName();
+            val result =
+                new ToStringBuilder(event, ToStringStyle.NO_CLASS_NAME_STYLE)
+                    .append("event", event.getId())
+                    .append("timestamp", new Date(event.getTimestamp()))
+                    .append("source", sourceName)
+                    .toString();
             return new String[]{result};
         }
         return this.delegate.resolveFrom(joinPoint, o);

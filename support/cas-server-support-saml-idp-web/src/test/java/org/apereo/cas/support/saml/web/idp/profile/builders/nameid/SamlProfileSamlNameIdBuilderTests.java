@@ -1,6 +1,5 @@
 package org.apereo.cas.support.saml.web.idp.profile.builders.nameid;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.principal.ShibbolethCompatiblePersistentIdGenerator;
 import org.apereo.cas.config.CasCoreHttpConfiguration;
 import org.apereo.cas.config.CoreSamlConfiguration;
@@ -8,6 +7,8 @@ import org.apereo.cas.support.saml.OpenSamlConfigBean;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.support.saml.services.idp.metadata.SamlRegisteredServiceServiceProviderMetadataFacade;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.validation.Assertion;
 import org.junit.Test;
@@ -36,7 +37,6 @@ import static org.mockito.Mockito.*;
  * @since 5.3.0
  */
 @RunWith(SpringRunner.class)
-@Slf4j
 @SpringBootTest(classes = {
     RefreshAutoConfiguration.class,
     CasCoreHttpConfiguration.class,
@@ -49,26 +49,26 @@ public class SamlProfileSamlNameIdBuilderTests {
 
     @Test
     public void verifyAction() {
-        final SamlProfileSamlNameIdBuilder b = new SamlProfileSamlNameIdBuilder(openSamlConfigBean, new ShibbolethCompatiblePersistentIdGenerator());
-        final AuthnRequest authnRequest = mock(AuthnRequest.class);
-        final Issuer issuer = mock(Issuer.class);
+        val b = new SamlProfileSamlNameIdBuilder(openSamlConfigBean, new ShibbolethCompatiblePersistentIdGenerator());
+        val authnRequest = mock(AuthnRequest.class);
+        val issuer = mock(Issuer.class);
         when(issuer.getValue()).thenReturn("https://idp.example.org");
         when(authnRequest.getIssuer()).thenReturn(issuer);
 
-        final NameIDPolicy policy = mock(NameIDPolicy.class);
+        val policy = mock(NameIDPolicy.class);
         when(policy.getFormat()).thenReturn(NameID.EMAIL);
         when(authnRequest.getNameIDPolicy()).thenReturn(policy);
 
-        final SamlRegisteredService service = new SamlRegisteredService();
+        val service = new SamlRegisteredService();
         service.setServiceId("entity-id");
         service.setRequiredNameIdFormat(NameID.EMAIL);
-        final SamlRegisteredServiceServiceProviderMetadataFacade facade = mock(SamlRegisteredServiceServiceProviderMetadataFacade.class);
+        val facade = mock(SamlRegisteredServiceServiceProviderMetadataFacade.class);
         when(facade.getEntityId()).thenReturn(service.getServiceId());
-        final Assertion assertion = mock(Assertion.class);
+        val assertion = mock(Assertion.class);
         when(assertion.getPrincipal()).thenReturn(new AttributePrincipalImpl("casuser"));
 
         when(facade.getSupportedNameIdFormats()).thenReturn(CollectionUtils.wrapList(NameID.TRANSIENT, NameID.EMAIL));
-        final NameID result = b.build(authnRequest, new MockHttpServletRequest(), new MockHttpServletResponse(),
+        val result = b.build(authnRequest, new MockHttpServletRequest(), new MockHttpServletResponse(),
             assertion, service, facade, SAMLConstants.SAML2_POST_BINDING_URI, mock(MessageContext.class));
         assertNotNull(result);
         assertEquals(NameID.EMAIL, result.getFormat());

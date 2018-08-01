@@ -1,9 +1,5 @@
 package org.apereo.cas.syncope.authentication;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.syncope.common.lib.to.UserTO;
 import org.apereo.cas.authentication.AuthenticationHandler;
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.exceptions.AccountDisabledException;
@@ -15,6 +11,12 @@ import org.apereo.cas.config.CasCoreUtilConfiguration;
 import org.apereo.cas.config.CasPersonDirectoryTestConfiguration;
 import org.apereo.cas.config.SyncopeAuthenticationConfiguration;
 import org.apereo.cas.util.MockWebServer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.syncope.common.lib.to.UserTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +60,7 @@ public class SyncopeAuthenticationHandlerTests {
     @Test
     public void verifyHandlerPasses() {
         try {
-            final UserTO user = new UserTO();
+            val user = new UserTO();
             user.setUsername("casuser");
             startMockSever(user);
             syncopeAuthenticationHandler.authenticate(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword("casuser"));
@@ -72,7 +74,7 @@ public class SyncopeAuthenticationHandlerTests {
     @Test
     public void verifyHandlerMustChangePassword() {
         try {
-            final UserTO user = new UserTO();
+            val user = new UserTO();
             user.setUsername("casuser");
             user.setMustChangePassword(true);
             startMockSever(user);
@@ -90,7 +92,7 @@ public class SyncopeAuthenticationHandlerTests {
     @Test
     public void verifyHandlerSuspended() {
         try {
-            final UserTO user = new UserTO();
+            val user = new UserTO();
             user.setUsername("casuser");
             user.setSuspended(true);
             startMockSever(user);
@@ -106,7 +108,7 @@ public class SyncopeAuthenticationHandlerTests {
     }
 
     private void startMockSever(final UserTO user) throws JsonProcessingException {
-        final String data = MAPPER.writeValueAsString(user);
+        val data = MAPPER.writeValueAsString(user);
         this.webServer = new MockWebServer(8095,
             new ByteArrayResource(data.getBytes(StandardCharsets.UTF_8), "REST Output"),
             MediaType.APPLICATION_JSON_VALUE);

@@ -7,6 +7,8 @@ import org.apereo.cas.support.oauth.OAuth20Constants;
 import org.apereo.cas.support.oauth.OAuth20GrantTypes;
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.val;
 import org.junit.Test;
 import org.pac4j.core.context.J2EContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -26,20 +28,20 @@ import static org.mockito.Mockito.*;
 public class OAuth20PasswordGrantTypeAuthorizationRequestValidatorTests {
     @Test
     public void verifyValidator() {
-        final ServicesManager serviceManager = mock(ServicesManager.class);
-        final OAuthRegisteredService service = new OAuthRegisteredService();
+        val serviceManager = mock(ServicesManager.class);
+        val service = new OAuthRegisteredService();
         service.setName("OAuth");
         service.setClientId("client");
         service.setClientSecret("secret");
         service.setServiceId("https://callback.example.org");
 
         when(serviceManager.getAllServices()).thenReturn(CollectionUtils.wrapList(service));
-        final OAuth20PasswordGrantTypeAuthorizationRequestValidator v =
+        val v =
             new OAuth20PasswordGrantTypeAuthorizationRequestValidator(serviceManager, new WebApplicationServiceFactory(),
                 new RegisteredServiceAccessStrategyAuditableEnforcer());
 
-        final MockHttpServletRequest request = new MockHttpServletRequest();
-        final MockHttpServletResponse response = new MockHttpServletResponse();
+        val request = new MockHttpServletRequest();
+        val response = new MockHttpServletResponse();
         assertFalse(v.validate(new J2EContext(request, response)));
 
         request.addParameter(OAuth20Constants.GRANT_TYPE, OAuth20GrantTypes.PASSWORD.getType());

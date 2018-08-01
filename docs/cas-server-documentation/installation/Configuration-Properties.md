@@ -69,7 +69,8 @@ Load settings from external properties/yaml configuration files.
 
 ### Git Repository
 
-Load settings from an internal/external Git repository.
+Allow the CAS Spring Cloud configuration server to load settings from an internal/external Git repository.
+This then allows CAS to become a client of the configuration server, consuming settings over HTTP where needed.
 
 ```properties
 # spring.profiles.active=default
@@ -91,7 +92,7 @@ The above configuration also applies to online git-based repositories such as Gi
 
 ### Consul
 
-Load settings from [HashiCorp's Consul](Service-Discovery-Guide-Consul.html).
+Allow the CAS Spring Cloud configuration server to load settings from [HashiCorp's Consul](Service-Discovery-Guide-Consul.html).
 
 ```properties
 # spring.cloud.consul.config.enabled=true
@@ -105,7 +106,7 @@ Load settings from [HashiCorp's Consul](Service-Discovery-Guide-Consul.html).
 
 ### Vault
 
-Load settings from [HashiCorp's Vault](Configuration-Properties-Security.html).
+Allow the CAS Spring Cloud configuration server to load settings from [HashiCorp's Vault](Configuration-Properties-Security.html).
 
 ```properties
 # spring.cloud.vault.host=127.0.0.1
@@ -122,7 +123,7 @@ Load settings from [HashiCorp's Vault](Configuration-Properties-Security.html).
 
 ### MongoDb
 
-Load settings from a MongoDb instance.
+Allow the CAS Spring Cloud configuration server to load settings from a MongoDb instance.
 
 ```properties
 # cas.spring.cloud.mongo.uri=mongodb://casuser:Mellon@ds135522.mlab.com:35522/jasigcas
@@ -130,7 +131,7 @@ Load settings from a MongoDb instance.
 
 ### Azure KeyVault Secrets
 
-Load settings from Microsoft Azure's KeyVault instance.
+Allow the CAS Spring Cloud configuration server to load settings from Microsoft Azure's KeyVault instance.
 
 ```properties
 # azure.keyvault.enabled=true
@@ -142,7 +143,7 @@ Load settings from Microsoft Azure's KeyVault instance.
 
 ### ZooKeeper
 
-Load settings from an Apache ZooKeeper instance.
+Allow the CAS Spring Cloud configuration server to load settings from an Apache ZooKeeper instance.
 
 ```properties
 # spring.cloud.zookeeper.connectString=localhost:2181
@@ -176,7 +177,8 @@ under the configuration key `cas.spring.cloud.dynamodb`.
 
 ### JDBC
 
-Load settings from a RDBMS instance. Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.spring.cloud.jdbc`.
+Allow the CAS Spring Cloud configuration server to load settings from a RDBMS instance. Database settings for this feature 
+are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.spring.cloud.jdbc`.
 
 ```properties
 # cas.spring.cloud.jdbc.sql=SELECT id, name, value FROM CAS_SETTINGS_TABLE
@@ -258,7 +260,7 @@ via [Kafka](http://docs.spring.io/spring-cloud-stream/docs/current/reference/htm
 The following properties are related to the embedded containers that ship with CAS.
 
 ```properties
-server.contextPath=/cas
+server.servlet.context-path=/cas
 
 # By default and if you remove this setting, CAS runs on port 8080
 server.port=8443
@@ -310,13 +312,13 @@ In the event that you decide to run CAS without any SSL configuration in the emb
 yet wish to customize the connector configuration that is linked to the running port (i.e. `8080`), the following settings may apply:
 
 ```properties
-# cas.server.httpProxy.enabled=true
-# cas.server.httpProxy.secure=true
-# cas.server.httpProxy.protocol=AJP/1.3
-# cas.server.httpProxy.scheme=https
-# cas.server.httpProxy.redirectPort=
-# cas.server.httpProxy.proxyPort=
-# cas.server.httpProxy.attributes.attributeName=attributeValue
+# cas.server.tomcat.httpProxy.enabled=true
+# cas.server.tomcat.httpProxy.secure=true
+# cas.server.tomcat.httpProxy.protocol=AJP/1.3
+# cas.server.tomcat.httpProxy.scheme=https
+# cas.server.tomcat.httpProxy.redirectPort=
+# cas.server.tomcat.httpProxy.proxyPort=
+# cas.server.tomcat.httpProxy.attributes.attributeName=attributeValue
 ```
 
 #### HTTP
@@ -325,10 +327,10 @@ Enable HTTP connections for the embedded Tomcat container, in addition to the co
 linked to the `server.port` setting.
 
 ```properties
-# cas.server.http.port=8080
-# cas.server.http.protocol=org.apache.coyote.http11.Http11NioProtocol
-# cas.server.http.enabled=true
-# cas.server.http.attributes.attributeName=attributeValue
+# cas.server.tomcat.http.port=8080
+# cas.server.tomcat.http.protocol=org.apache.coyote.http11.Http11NioProtocol
+# cas.server.tomcat.http.enabled=true
+# cas.server.tomcat.http.attributes.attributeName=attributeValue
 ```
 
 #### AJP
@@ -336,18 +338,18 @@ linked to the `server.port` setting.
 Enable AJP connections for the embedded Tomcat container,
 
 ```properties
-# cas.server.ajp.secure=false
-# cas.server.ajp.enabled=false
-# cas.server.ajp.proxyPort=-1
-# cas.server.ajp.protocol=AJP/1.3
-# cas.server.ajp.asyncTimeout=5000
-# cas.server.ajp.scheme=http
-# cas.server.ajp.maxPostSize=20971520
-# cas.server.ajp.port=8009
-# cas.server.ajp.enableLookups=false
-# cas.server.ajp.redirectPort=-1
-# cas.server.ajp.allowTrace=false
-# cas.server.ajp.attributes.attributeName=attributeValue
+# cas.server.tomcat.ajp.secure=false
+# cas.server.tomcat.ajp.enabled=false
+# cas.server.tomcat.ajp.proxyPort=-1
+# cas.server.tomcat.ajp.protocol=AJP/1.3
+# cas.server.tomcat.ajp.asyncTimeout=5000
+# cas.server.tomcat.ajp.scheme=http
+# cas.server.tomcat.ajp.maxPostSize=20971520
+# cas.server.tomcat.ajp.port=8009
+# cas.server.tomcat.ajp.enableLookups=false
+# cas.server.tomcat.ajp.redirectPort=-1
+# cas.server.tomcat.ajp.allowTrace=false
+# cas.server.tomcat.ajp.attributes.attributeName=attributeValue
 ```
 
 #### SSL Valve
@@ -357,11 +359,11 @@ running in front of Tomcat via an HTTP header. If you enable this, make sure you
 that this header does not originate with the client (e.g. the browser).
 
 ```properties
-# cas.server.sslValve.enabled=false
-# cas.server.sslValve.sslClientCertHeader=ssl_client_cert
-# cas.server.sslValve.sslCipherHeader=ssl_cipher
-# cas.server.sslValve.sslSessionIdHeader=ssl_session_id
-# cas.server.sslValve.sslCipherUserKeySizeHeader=ssl_cipher_usekeysize
+# cas.server.tomcat.sslValve.enabled=false
+# cas.server.tomcat.sslValve.sslClientCertHeader=ssl_client_cert
+# cas.server.tomcat.sslValve.sslCipherHeader=ssl_cipher
+# cas.server.tomcat.sslValve.sslSessionIdHeader=ssl_session_id
+# cas.server.tomcat.sslValve.sslCipherUserKeySizeHeader=ssl_cipher_usekeysize
 ```
 
 Example HAProxy Configuration (snippet): Configure SSL frontend with cert optional, redirect to cas, if cert provided, put it on header.
@@ -392,11 +394,11 @@ Enable the [extended access log](http://tomcat.apache.org/tomcat-8.0-doc/config/
 for the embedded Tomcat container.
 
 ```properties
-# cas.server.extAccessLog.enabled=false
-# cas.server.extAccessLog.pattern=c-ip s-ip cs-uri sc-status time x-threadname x-H(secure) x-H(remoteUser)
-# cas.server.extAccessLog.suffix=.log
-# cas.server.extAccessLog.prefix=localhost_access_extended
-# cas.server.extAccessLog.directory=
+# cas.server.tomcat.extAccessLog.enabled=false
+# cas.server.tomcat.extAccessLog.pattern=c-ip s-ip cs-uri sc-status time x-threadname x-H(secure) x-H(remoteUser)
+# cas.server.tomcat.extAccessLog.suffix=.log
+# cas.server.tomcat.extAccessLog.prefix=localhost_access_extended
+# cas.server.tomcat.extAccessLog.directory=
 ```
 
 #### Rewrite Valve
@@ -404,7 +406,7 @@ for the embedded Tomcat container.
 Enable the [rewrite valve](https://tomcat.apache.org/tomcat-8.0-doc/rewrite.html) for the embedded Tomcat container.
 
 ```properties
-# cas.server.rewriteValve.location=classpath://container/tomcat/rewrite.config
+# cas.server.tomcat.rewriteValve.location=classpath://container/tomcat/rewrite.config
 ```
 
 #### Basic Authentication
@@ -412,10 +414,10 @@ Enable the [rewrite valve](https://tomcat.apache.org/tomcat-8.0-doc/rewrite.html
 Enable basic authentication for the embedded Apache Tomcat.
 
 ```properties
-# cas.server.basicAuthn.enabled=true
-# cas.server.basicAuthn.securityRoles[0]=admin
-# cas.server.basicAuthn.authRoles[0]=admin
-# cas.server.basicAuthn.patterns[0]=/*
+# cas.server.tomcat.basicAuthn.enabled=true
+# cas.server.tomcat.basicAuthn.securityRoles[0]=admin
+# cas.server.tomcat.basicAuthn.authRoles[0]=admin
+# cas.server.tomcat.basicAuthn.patterns[0]=/*
 ```
 
 #### Session Clustering & Replication
@@ -423,27 +425,27 @@ Enable basic authentication for the embedded Apache Tomcat.
 Enable session replication to replicate web application session deltas.
 
 ```properties
-# cas.server.clustering.enabled=false
-# cas.server.clustering.clusterMembers=ip-address:port:index
+# cas.server.tomcat.clustering.enabled=false
+# cas.server.tomcat.clustering.clusterMembers=ip-address:port:index
 
-# cas.server.clustering.expireSessionsOnShutdown=false
-# cas.server.clustering.channelSendOptions=8
+# cas.server.tomcat.clustering.expireSessionsOnShutdown=false
+# cas.server.tomcat.clustering.channelSendOptions=8
 
-# cas.server.clustering.receiverPort=4000
-# cas.server.clustering.receiverTimeout=5000
-# cas.server.clustering.receiverMaxThreads=6
-# cas.server.clustering.receiverAddress=auto
-# cas.server.clustering.receiverAutoBind=100
+# cas.server.tomcat.clustering.receiverPort=4000
+# cas.server.tomcat.clustering.receiverTimeout=5000
+# cas.server.tomcat.clustering.receiverMaxThreads=6
+# cas.server.tomcat.clustering.receiverAddress=auto
+# cas.server.tomcat.clustering.receiverAutoBind=100
 
-# cas.server.clustering.membershipPort=45564
-# cas.server.clustering.membershipAddress=228.0.0.4
-# cas.server.clustering.membershipFrequency=500
-# cas.server.clustering.membershipDropTime=3000
-# cas.server.clustering.membershipRecoveryEnabled=true
-# cas.server.clustering.membershipLocalLoopbackDisabled=false
-# cas.server.clustering.membershipRecoveryCounter=10
+# cas.server.tomcat.clustering.membershipPort=45564
+# cas.server.tomcat.clustering.membershipAddress=228.0.0.4
+# cas.server.tomcat.clustering.membershipFrequency=500
+# cas.server.tomcat.clustering.membershipDropTime=3000
+# cas.server.tomcat.clustering.membershipRecoveryEnabled=true
+# cas.server.tomcat.clustering.membershipLocalLoopbackDisabled=false
+# cas.server.tomcat.clustering.membershipRecoveryCounter=10
 
-# cas.server.clustering.managerType=DELTA|BACKUP
+# cas.server.tomcat.clustering.managerType=DELTA|BACKUP
 ```
 
 ## CAS Server
@@ -469,71 +471,102 @@ In order to skip this step and summarize, set the system property `-DCAS_BANNER_
 CAS may also be conditionally configured to report, as part of the banner, whether a newer CAS release is available for an upgrade.
 This check is off by default and may be enabled with a system property of `-DCAS_UPDATE_CHECK_ENABLED=true`.
 
-## Spring Boot Endpoints
+## Actuator Management Endpoints
 
-The following properties describe access controls and settings for the `/status`
-endpoint of CAS which provides administrative functionality and oversight into the CAS software. These endpoints are specific to Spring Boot.
+The following properties describe access controls and settings for the `/actuator`
+endpoint of CAS which provides administrative functionality and oversight into the CAS software.
 
 To learn more about this topic, [please review this guide](Monitoring-Statistics.html).
 
 ```properties
-# Globally control whether endpoints are enabled
-# or marked as sensitive to require authentication.
-# endpoints.enabled=true
-# endpoints.sensitive=true
+# management.endpoints.enabled-by-default=true
+# management.endpoints.web.base-path=/actuator
 
-management.contextPath=/status
-management.security.enabled=true
-management.security.roles=ACTUATOR,ADMIN
-management.security.sessions=if_required
-
-# Each of the below endpoints can either be disabled
-# or can be marked as 'sensitive' (or not)
-# to enable authentication. The global flags above control
-# everything and individual settings below act as overrides.
-
-# endpoints.restart.enabled=false
-# endpoints.shutdown.enabled=false
-# endpoints.autoconfig.enabled=true
-# endpoints.beans.enabled=true
-# endpoints.bus.enabled=true
-# endpoints.configprops.enabled=true
-# endpoints.dump.enabled=true
-# endpoints.env.enabled=true
-# endpoints.health.enabled=true
-# endpoints.features.enabled=true
-# endpoints.info.enabled=true
-# endpoints.loggers.enabled=true
-# endpoints.logfile.enabled=true
-# endpoints.trace.enabled=true
-# endpoints.docs.enabled=false
-# endpoints.heapdump.enabled=true
-
-# IP address may be enough to protect all endpoints.
-# It's set to always protect the /status endpoint.
-# cas.adminPagesSecurity.ip=127\.0\.0\.1
-# cas.adminPagesSecurity.alternateIpHeaderName=X-Forwarded-For
-
-# If you wish to protect the admin pages via CAS itself, configure the rest.
-# cas.adminPagesSecurity.loginUrl=https://sso.example.org/cas/login
-# cas.adminPagesSecurity.service=https://sso.example.org/cas/status/dashboard
-# cas.adminPagesSecurity.users=file:/etc/cas/config/adminusers.properties
-# cas.adminPagesSecurity.adminRoles[0]=ROLE_ADMIN
-
-# cas.adminPagesSecurity.actuatorEndpointsEnabled=true
+# management.endpoints.web.exposure.include=info,health,status,configuration-metadata
+# management.server.add-application-context-header=false
 ```
 
-The format of the `adminusers.properties` file which houses a list of authorized users to access the admin pages via CAS is:
+Credentials for basic authentication may be defined via the following settings:
 
 ```properties
-# casuser=notused,ROLE_ADMIN
+# spring.security.user.name=casuser
+# spring.security.user.password=
+# spring.security.user.roles=
 ```
 
-The format of the file is as such:
+Endpoint security configuration controlled by CAS may be controlled via the following settings:
 
-- `casuser`: This is the authenticated user id received from CAS
-- `notused`: This is the password field that isn't used by CAS. You could literally put any value you want in its place.
-- `ROLE_ADMIN`: Role assigned to the authorized user as an attribute, which is then cross checked against CAS configuration.
+```properties
+# cas.monitor.endpoints.enableEndpointSecurity=true
+```
+
+JAAS authentication for endpoint security may be configured via the following settings:
+
+```properties
+# cas.monitor.endpoints.jaas.refreshConfigurationOnStartup=true
+# cas.monitor.endpoints.jaas.loginConfig=file:/etc/cas/config/jaas.conf
+# cas.monitor.endpoints.jaas.loginContextName=CAS
+```
+
+Shared LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) 
+under the configuration key `cas.monitor.endpoints.ldap`.
+
+LDAP authentication for endpoint security may be additionally configured via the following settings:
+
+```properties
+# cas.monitor.endpoints.ldap.ldapAuthz.roleAttribute=uugid
+# cas.monitor.endpoints.ldap.ldapAuthz.rolePrefix=ROLE_
+# cas.monitor.endpoints.ldap.ldapAuthz.allowMultipleResults=false
+# cas.monitor.endpoints.ldap.ldapAuthz.groupAttribute=
+# cas.monitor.endpoints.ldap.ldapAuthz.groupPrefix=
+# cas.monitor.endpoints.ldap.ldapAuthz.groupFilter=
+# cas.monitor.endpoints.ldap.ldapAuthz.groupBaseDn=
+# cas.monitor.endpoints.ldap.ldapAuthz.baseDn=
+# cas.monitor.endpoints.ldap.ldapAuthz.searchFilter=
+```
+
+Shared database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings)
+under the configuration key `cas.monitor.endpoints.jdbc`.
+
+JDBC authentication for endpoint security may be additionally configured via the following settings:
+
+```properties
+# cas.monitor.endpoints.jdbc.rolePrefix=
+# cas.monitor.endpoints.jdbc.query=
+```
+
+Password encoding  settings for this feature are available [here](Configuration-Properties-Common.html#password-encoding) 
+under the configuration key `cas.monitor.endpoints.jdbc`.
+
+
+To determine whether an endpoint is available, the calculation order for all endpoints is as follows:
+
+1. The `enabled` setting of the individual endpoint (i.e. `info`)is consulted in CAS settings, as demonstrated below:
+
+```properties
+# management.endpoint.info.enabled=true
+```
+2. If undefined, the global setting noted above is consulted from CAS settings.
+3. If undefined, the default built-in setting for the endpoint in CAS is consulted, which is typically `false` by default.
+
+Endpoints may also be mapped to custom arbitrary endpoints. For example, to remap the `health` endpoint to `healthcheck`, 
+specify the following settings:
+
+```properties
+# management.endpoints.web.path-mapping.health=healthcheck
+```
+
+The `health` endpoint may also be configured to show details using `management.endpoint.health.show-details` via the following conditions:
+
+| URL                  | Description
+|----------------------|-------------------------------------------------------
+| `never`              | Never display details of health monitors.
+| `always`             | Always display details of health monitors.
+| `when-authorized`   | Details are only shown to authorized users. Authorized roles can be configured using `management.endpoint.health.roles`.
+
+```properties
+# management.endpoint.health.show-details=never
+```
 
 ### Spring Boot Admin Server
 
@@ -547,102 +580,15 @@ To learn more about this topic, [please review this guide](Configuring-Monitorin
 # spring.boot.admin.client.metadata.user.password=
 ```
 
-## CAS Endpoints
-
-These are the collection of endpoints that are specific to CAS. To learn more about this topic, [please review this guide](Monitoring-Statistics.html).
-
-The following configuration keys are available and mapped to CAS endpoints:
-
-- `cas.monitor.endpoints`
-- `cas.monitor.endpoints.dashboard`
-- `cas.monitor.endpoints.discovery`
-- `cas.monitor.endpoints.auditEvents`
-- `cas.monitor.endpoints.authenticationEvents`
-- `cas.monitor.endpoints.configurationState`
-- `cas.monitor.endpoints.healthCheck`
-- `cas.monitor.endpoints.loggingConfig`
-- `cas.monitor.endpoints.metrics`
-- `cas.monitor.endpoints.attributeResolution`
-- `cas.monitor.endpoints.singleSignOnReport`
-- `cas.monitor.endpoints.statistics`
-- `cas.monitor.endpoints.trustedDevices`
-- `cas.monitor.endpoints.status`
-- `cas.monitor.endpoints.singleSignOnStatus`
-- `cas.monitor.endpoints.springWebflowReport`
-- `cas.monitor.endpoints.registeredServicesReport`
-- `cas.monitor.endpoints.configurationMetadata`
-
-The following settings equally apply to all CAS endpoints:
-
-```properties
-# ${configurationKey}.enabled=false
-# ${configurationKey}.sensitive=true
-```
-
-### Securing Endpoints With Spring Security
-
-Monitoring endpoints may also be secured by Spring Security. You can define the authentication scheme/paths via the below settings.
-
-```properties
-# security.ignored[0]=/**
-# security.filterOrder=0
-# security.requireSsl=true
-# security.sessions=if_required
-# security.user.name=<predefined-userid>
-# security.user.password=<predefined-password>
-# security.user.role=ACTUATOR
-```
-
-#### Basic Authentication
-
-Enable basic authentication for Spring Security to secure endpoints.
-
-```properties
-# security.basic.authorizeMode=none|role|authenticated
-# security.basic.enabled=true
-# security.basic.path=/cas/status/**
-# security.basic.realm=CAS
-```
-
-#### JAAS Authentication
-
-Enable JAAS authentication for Spring Security to secure endpoints.
-
-```properties
-# cas.adminPagesSecurity.jaas.loginConfig=file:/path/to/config
-# cas.adminPagesSecurity.jaas.refreshConfigurationOnStartup=true
-# cas.adminPagesSecurity.jaas.loginContextName=
-```
-
-#### JDBC Authentication
-
-Enable JDBC authentication for Spring Security to secure endpoints. Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.adminPagesSecurity.jdbc`.
-
-```properties
-# cas.adminPagesSecurity.jdbc.query=SELECT username,password,enabled FROM users WHERE username=?
-```
-
-#### LDAP Authentication
-
-Enable LDAP authentication for Spring Security to secure endpoints. LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.adminPagesSecurity.ldap`.
-
-```properties
-# cas.adminPagesSecurity.ldap.ldapAuthz.groupAttribute=
-# cas.adminPagesSecurity.ldap.ldapAuthz.groupPrefix=
-# cas.adminPagesSecurity.ldap.ldapAuthz.groupFilter=
-# cas.adminPagesSecurity.ldap.ldapAuthz.rolePrefix=ROLE_
-# cas.adminPagesSecurity.ldap.ldapAuthz.roleAttribute=uugid
-```
-
 ## Web Application Session
 
 Control the CAS web application session behavior
 as it's treated by the underlying servlet container engine.
 
 ```properties
-# server.session.timeout=300
-# server.session.cookie.httpOnly=true
-# server.session.trackingModes=COOKIE
+# server.servlet.session.timeout=PT30S
+# server.servlet.session.cookie.httpOnly=true
+# server.servlet.session.trackingModes=COOKIE
 ```
 
 ## Views
@@ -704,7 +650,7 @@ To learn more about this topic, [please review this guide](Logging.html).
 
 ```properties
 # logging.config=file:/etc/cas/log4j2.xml
-server.contextParameters.isLog4jAutoInitializationDisabled=true
+server.servlet.contextParameters.isLog4jAutoInitializationDisabled=true
 
 # Control log levels via properties
 # logging.level.org.apereo.cas=DEBUG
@@ -962,9 +908,9 @@ You will also need to ensure `grouper.client.properties` is available on the cla
 with the following configured properties:
 
 ```properties
-grouperClient.webService.url = http://192.168.99.100:32768/grouper-ws/servicesRest
-grouperClient.webService.login = banderson
-grouperClient.webService.password = password
+# grouperClient.webService.url = http://192.168.99.100:32768/grouper-ws/servicesRest
+# grouperClient.webService.login = banderson
+# grouperClient.webService.password = password
 ```
 
 ### Couchbase
@@ -1170,6 +1116,29 @@ Adaptive authentication can also react to specific times in order to trigger mul
 # cas.authn.adaptive.requireTimedMultifactor[0].onDays=Saturday,Sunday
 ```
 
+### IP Address Intelligence
+
+Examine the client IP address via the following strategies.
+
+#### REST Adaptive Authentication
+
+RESTful settings for this feature are available [here](Configuration-Properties-Common.html#restful-integrations) 
+under the configuration key `cas.authn.adaptive.ipIntel.rest`.
+
+#### Groovy Adaptive Authentication
+
+```properties
+# cas.authn.adaptive.ipIntel.groovy.location=file:/etc/cas/config/GroovyIPAddressIntelligenceService.groovy
+```
+
+#### BlackDot Adaptive Authentication
+
+```properties
+# cas.authn.adaptive.ipIntel.blackDot.url=http://check.getipintel.net/check.php?ip=%s
+# cas.authn.adaptive.ipIntel.blackDot.emailAddress=
+# cas.authn.adaptive.ipIntel.blackDot.mode=DYNA_LIST
+```
+
 ## Surrogate Authentication
 
 Authenticate on behalf of another user.
@@ -1319,6 +1288,15 @@ Send text messaging using Clickatell.
 # cas.smsProviders.clickatell.token=
 ```
 
+### Nexmo
+
+Send text messaging using Nexmo.
+
+```properties
+# cas.smsProviders.nexmo.apiToken=
+# cas.smsProviders.nexmo.apiSecret=
+```
+
 ### Amazon SNS
 
 Send text messaging using Amazon SNS.
@@ -1373,7 +1351,6 @@ To learn more about this topic, [please review this guide](Cassandra-Authenticat
 # cas.authn.cassandra.keyspace=
 # cas.authn.cassandra.contactPoints=localhost1,localhost2
 # cas.authn.cassandra.localDc=
-# cas.authn.cassandra.shuffleReplicas=true
 # cas.authn.cassandra.retryPolicy=DEFAULT_RETRY_POLICY|DOWNGRADING_CONSISTENCY_RETRY_POLICY|FALLTHROUGH_RETRY_POLICY
 # cas.authn.cassandra.compression=LZ4|SNAPPY|NONE
 # cas.authn.cassandra.consistencyLevel=ANY|ONE|TWO|THREE|QUORUM|LOCAL_QUORUM|ALL|EACH_QUORUM|LOCAL_SERIAL|SERIAL|LOCAL_ONE
@@ -1576,7 +1553,8 @@ server, simply increment the index and specify the settings for the next LDAP se
 retrieved from [other attribute repository sources](#authentication-attributes), if any.
 Attributes retrieved directly as part of LDAP authentication trump all other attributes.
 
-To learn more about this topic, [please review this guide](LDAP-Authentication.html). LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.authn.ldap[0]`.
+To learn more about this topic, [please review this guide](LDAP-Authentication.html). 
+LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.authn.ldap[0]`.
 
 ```properties
 #
@@ -1809,8 +1787,8 @@ configured via the static authentication handler, and <strong>MUST</strong> be r
 prior to production rollouts.</p></div>
 
 Principal transformation settings for this feature are available [here](Configuration-Properties-Common.html#authentication-principal-transformation) under the configuration key `cas.authn.accept`.
-
-Password encoding  settings for this feature are available [here](Configuration-Properties-Common.html#password-encoding) under the configuration key `cas.authn.accept`.
+Password policy settings for this feature are available [here](Configuration-Properties-Common.html#password-policy-settings) under the configuration key `cas.authn.accept.passwordPolicy`.
+Password encoding settings for this feature are available [here](Configuration-Properties-Common.html#password-encoding) under the configuration key `cas.authn.accept`.
 
 ```properties
 # cas.authn.accept.users=
@@ -1995,13 +1973,15 @@ strategies when collecting principal attributes:
 # cas.authn.wsfed[0].identityProviderUrl=https://adfs.example.org/adfs/ls/
 # cas.authn.wsfed[0].identityProviderIdentifier=https://adfs.example.org/adfs/services/trust
 # cas.authn.wsfed[0].relyingPartyIdentifier=urn:cas:localhost
-# cas.authn.wsfed[0].attributesType=WSFED
 # cas.authn.wsfed[0].signingCertificateResources=classpath:adfs-signing.crt
-# cas.authn.wsfed[0].tolerance=10000
 # cas.authn.wsfed[0].identityAttribute=upn
+
+# cas.authn.wsfed[0].attributesType=WSFED
+# cas.authn.wsfed[0].tolerance=10000
 # cas.authn.wsfed[0].attributeResolverEnabled=true
 # cas.authn.wsfed[0].autoRedirect=true
 # cas.authn.wsfed[0].name=
+# cas.authn.wsfed[0].attributeMutatorScript.location=file:/etc/cas/config/wsfed-attr.groovy
 
 # cas.authn.wsfed[0].principal.principalAttribute=
 # cas.authn.wsfed[0].principal.returnNull=false
@@ -2134,6 +2114,22 @@ This section controls how that process should behave.
 # cas.authn.mfa.trusted.cleaner.schedule.repeatInterval=60000
 # cas.authn.mfa.trusted.cleaner.enabled=true
 ```
+
+### Simple Multifactor Authentication
+
+To learn more about this topic, [please review this guide](Simple-Multifactor-Authentication.html).
+
+```properties
+# cas.authn.mfa.simple.name=
+# cas.authn.mfa.simple.timeToKillInSeconds=30
+```
+
+Email notifications settings for this feature are available [here](Configuration-Properties-Common.html#email-notifications) 
+under the configuration key `cas.authn.mfa.simple`. SMS notifications settings for this feature are 
+available [here](Configuration-Properties-Common.html#sms-notifications) under the configuration key `cas.authn.mfa.simple`.
+
+Multifactor authentication bypass settings for this provider are available [here](Configuration-Properties-Common.html#multifactor-authentication-bypass)
+under the configuration key `cas.authn.mfa.simple`.
 
 ### Google Authenticator
 
@@ -2433,11 +2429,23 @@ A given attribute that is to be encoded in the final SAML response may contain a
 Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) 
 under the configuration key `cas.authn.samlIdp.metadata.jpa`.
 
+ ```properties
+ # cas.authn.samlIdp.metadata.jpa.idpMetadataEnabled=true
+ ```
+ 
+ The signing key and the encryption key [are both JWKs](Configuration-Properties-Common.html#signing--encryption) of size `512` and `256`. Signing & encryption settings for this feature are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.authn.samlIdp.metadata.jpa`.
+ 
 #### SAML Metadata MongoDb
 
  Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) 
  under the configuration key `cas.authn.samlIdp.metadata`.
  
+ ```properties
+ # cas.authn.samlIdp.metadata.mongo.idpMetadataCollection=saml-idp-metadata
+ ```
+ 
+ The signing key and the encryption key [are both JWKs](Configuration-Properties-Common.html#signing--encryption) of size `512` and `256`. Signing & encryption settings for this feature are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.authn.samlIdp.metadata.mongo`.
+
  #### SAML Metadata REST
  
 RESTful settings for this feature are available [here](Configuration-Properties-Common.html#restful-integrations) 
@@ -2560,15 +2568,17 @@ Allow CAS to become an OpenID Connect provider (OP). To learn more about this to
 # cas.authn.oidc.dynamicClientRegistrationMode=OPEN|PROTECTED
 
 # cas.authn.oidc.subjectTypes=public,pairwise
-
-# Supported scopes
 # cas.authn.oidc.scopes=openid,profile,email,address,phone,offline_access
-
-# Supported claims
 # cas.authn.oidc.claims=sub,name,preferred_username,family_name, \
 #    given_name,middle_name,given_name,profile, \
 #    picture,nickname,website,zoneinfo,locale,updated_at,birthdate, \
 #    email,email_verified,phone_number,phone_number_verified,address
+
+# cas.authn.oidc.responseTypesSupported=code,token,id_token token
+# cas.authn.oidc.introspectionSupportedAuthenticationMethods=client_secret_basic
+# cas.authn.oidc.claimTypesSupported=normal
+# cas.authn.oidc.grantTypesSupported=authorization_code,password,client_credentials,refresh_token
+# cas.authn.oidc.idTokenSigningAlgValuesSupported=none,RS256
 
 # Define custom scopes and claims
 # cas.authn.oidc.userDefinedScopes.scope1=cn,givenName,photos,customAttribute
@@ -2646,18 +2656,36 @@ Delegate authentication to an generic OAuth2 server. Common settings for this id
 
 ### OpenID Connect
 
-Delegate authentication to an external OpenID Connect server. Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-settings) under the configuration key `cas.authn.pac4j.oidc[0]`.
+Delegate authentication to an external OpenID Connect server.
+
+Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-settings) 
+under the configuration key `cas.authn.pac4j.oidc[0]`.
+
+#### Google
+
+Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-openid-connect-settings) 
+under the configuration key `cas.authn.pac4j.oidc[0].google`.
+
+#### Azure AD
+
+Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-openid-connect-settings) 
+under the configuration key `cas.authn.pac4j.oidc[0].azure`.
+
+The following settings specifically apply to this provider:
 
 ```properties
-# cas.authn.pac4j.oidc[0].type=KEYCLOAK|GOOGLE|AZURE|GENERIC
-# cas.authn.pac4j.oidc[0].discoveryUri=
-# cas.authn.pac4j.oidc[0].logoutUrl=
-# cas.authn.pac4j.oidc[0].maxClockSkew=
-# cas.authn.pac4j.oidc[0].scope=
-# cas.authn.pac4j.oidc[0].useNonce=
-# cas.authn.pac4j.oidc[0].preferredJwsAlgorithm=
-# cas.authn.pac4j.oidc[0].customParams.param1=value1
+# cas.authn.pac4j.oidc[0].azure.tenant=tenant-name
 ```
+
+#### KeyCloak
+
+Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-openid-connect-settings) 
+under the configuration key `cas.authn.pac4j.oidc[0].keycloak`.
+
+#### Generic
+
+Common settings for this identity provider are available [here](Configuration-Properties-Common.html#delegated-authentication-openid-connect-settings) 
+under the configuration key `cas.authn.pac4j.oidc[0].generic`.
 
 ### SAML2
 
@@ -2686,6 +2714,8 @@ prefixes for the `keystorePath` or `identityProviderMetadataPath` property).
 # cas.authn.pac4j.saml[0].passive=false
 
 # cas.authn.pac4j.saml[0].wantsAssertionsSigned=
+# cas.authn.pac4j.saml[0].principalIdAttribute=eduPersonPrincipalName
+# cas.authn.pac4j.saml[0].useNameQualifier=true
 # cas.authn.pac4j.saml[0].attributeConsumingServiceIndex=
 # cas.authn.pac4j.saml[0].assertionConsumerServiceIndex=-1
 ```
@@ -2749,8 +2779,7 @@ The signing and encryption keys [are both JWKs](Configuration-Properties-Common.
 
 ## OAuth2
 
-Allows CAS to act as an OAuth2 provider. Here you can control how
-long various tokens issued by CAS should last, etc.
+Allows CAS to act as an OAuth2 provider. Here you can control how long various tokens issued by CAS should last, etc.
 
 To learn more about this topic, [please review this guide](OAuth-OpenId-Authentication.html).
 
@@ -2763,6 +2792,10 @@ To learn more about this topic, [please review this guide](OAuth-OpenId-Authenti
 # cas.authn.oauth.accessToken.releaseProtocolAttributes=true
 # cas.authn.oauth.accessToken.timeToKillInSeconds=7200
 # cas.authn.oauth.accessToken.maxTimeToLiveInSeconds=28800
+
+# cas.authn.oauth.deviceToken.timeToKillInSeconds=2592000
+# cas.authn.oauth.deviceToken.refreshInterval=PT15S
+# cas.authn.oauth.deviceToken.userCodeLength=8
 
 # cas.authn.oauth.grants.resourceOwner.requireServiceHeader=true
 
@@ -2910,7 +2943,15 @@ and any number of log appenders that might push data to a variety of systems.</p
 
 Store audit logs inside a MongoDb database.
 
- Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.audit`.
+Common configuration settings for this feature are available 
+[here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.audit`.
+
+### Couchbase Audits
+
+Store audit logs inside a Couchbase database.
+
+Database settings for this feature are available [here](Configuration-Properties-Common.html#couchbase-integration-settings) 
+under the configuration key `cas.audit.couchbase`.
 
 ### Database Audits
 
@@ -2927,7 +2968,8 @@ under the configuration key `cas.audit.jdbc`.
 
 ### REST Audits
 
-Store audit logs inside a database. RESTful settings for this feature are available [here](Configuration-Properties-Common.html#restful-integrations) under the configuration key `cas.audit.rest`.
+Store audit logs inside a database. RESTful settings for this feature are 
+available [here](Configuration-Properties-Common.html#restful-integrations) under the configuration key `cas.audit.rest`.
 
 ## Sleuth Distributed Tracing
 
@@ -2974,16 +3016,21 @@ Decide how CAS should monitor the internal state of various cache storage servic
 
 ### Memcached Monitors
 
-Decide how CAS should monitor the internal state of a memcached connection pool. Integration settings for this registry are available [here](Configuration-Properties-Common.html#memcached-integration-settings) under the configuration key `cas.monitor.memcached`.
+Decide how CAS should monitor the internal state of a memcached connection pool. 
+Integration settings for this registry are available [here](Configuration-Properties-Common.html#memcached-integration-settings) 
+under the configuration key `cas.monitor.memcached`.
 
 ### MongoDb Monitors
 
-Decide how CAS should monitor the internal state of a MongoDb instance.  Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.monitor`.
+Decide how CAS should monitor the internal state of a MongoDb instance.  
+Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) 
+under the configuration key `cas.monitor`.
 
 ### Database Monitoring
 
 Decide how CAS should monitor the internal state of JDBC connections used
-for authentication or attribute retrieval. Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.monitor.jdbc`.
+for authentication or attribute retrieval. Database settings for this feature are 
+available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.monitor.jdbc`.
 
 ```properties
 # cas.monitor.jdbc.validationQuery=SELECT 1
@@ -2993,7 +3040,8 @@ for authentication or attribute retrieval. Database settings for this feature ar
 ### LDAP Connection Pool
 
 Decide how CAS should monitor the internal state of LDAP connections
-used for authentication, etc.  LDAP settings for this feature are available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.monitor.ldap`.
+used for authentication, etc.  LDAP settings for this feature are 
+available [here](Configuration-Properties-Common.html#ldap-connection-settings) under the configuration key `cas.monitor.ldap`.
 
 ```properties
 # cas.monitor.ldap.maxWait=5000
@@ -3032,15 +3080,18 @@ To learn more about this topic, [please review this guide](Configuring-Authentic
 
 ### InfluxDb Events
 
-Decide how CAS should store authentication events inside an InfluxDb instance. Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#influxdb-configuration) under the configuration key `cas.events.influxDb`.
+Decide how CAS should store authentication events inside an InfluxDb instance. Common 
+configuration settings for this feature are available [here](Configuration-Properties-Common.html#influxdb-configuration) under the configuration key `cas.events.influxDb`.
 
 ### Database Events
 
-Decide how CAS should store authentication events inside a database instance. Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.events.jpa`.
+Decide how CAS should store authentication events inside a database instance. Database 
+settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.events.jpa`.
 
 ### MongoDb Events
 
-Decide how CAS should store authentication events inside a MongoDb instance.  Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.events`.
+Decide how CAS should store authentication events inside a MongoDb instance. Common 
+configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.events`.
 
 ## Http Web Requests
 
@@ -3217,12 +3268,16 @@ To learn more about this topic, [please review this guide](LDAP-Service-Manageme
 ### Couchbase Service Registry
 
 Control how CAS services should be found inside a Couchbase instance.
-To learn more about this topic, [please review this guide](Couchbase-Service-Management.html). Database settings for this feature are available [here](Configuration-Properties-Common.html#couchbase-integration-settings) under the configuration key `cas.serviceRegistry.couchbase`.
+To learn more about this topic, [please review this guide](Couchbase-Service-Management.html). 
+Database settings for this feature are available [here](Configuration-Properties-Common.html#couchbase-integration-settings) 
+under the configuration key `cas.serviceRegistry.couchbase`.
 
 ### Database Service Registry
 
 Control how CAS services should be found inside a database instance.
-To learn more about this topic, [please review this guide](JPA-Service-Management.html). Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) under the configuration key `cas.serviceRegistry.jpa`.
+To learn more about this topic, [please review this guide](JPA-Service-Management.html). 
+Database settings for this feature are available [here](Configuration-Properties-Common.html#database-settings) 
+under the configuration key `cas.serviceRegistry.jpa`.
 
 ## Service Registry Replication
 
@@ -3337,6 +3392,8 @@ Signing & encryption settings for this registry are available [here](Configurati
 # spring.activemq.password=secret
 # spring.activemq.pool.enabled=true
 # spring.activemq.pool.max-connections=50
+# spring.activemq.packages.trust-all=false
+# spring.activemq.packages.trusted=org.apereo.cas
 ```
 
 #### JMS Ticket Registry Artemis
@@ -3447,17 +3504,24 @@ under the configuration key `cas.ticket.registry.dynamoDb`.
 
 ### MongoDb Ticket Registry
 
-To learn more about this topic, [please review this guide](MongoDb-Ticket-Registry.html). Signing & encryption settings for this registry are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.ticket.registry.mongo`.  Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.ticket.registry`.
+To learn more about this topic, [please review this guide](MongoDb-Ticket-Registry.html). 
+Signing & encryption settings for this registry are available [here](Configuration-Properties-Common.html#signing--encryption) 
+under the configuration key `cas.ticket.registry.mongo`.  Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.ticket.registry`.
 
 ### Redis Ticket Registry
 
-To learn more about this topic, [please review this guide](Redis-Ticket-Registry.html). Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#redis-configuration) under the configuration key `cas.ticket.registry`. Signing & encryption settings for this registry are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.ticket.registry.redis`.
+To learn more about this topic, [please review this guide](Redis-Ticket-Registry.html). 
+Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#redis-configuration) 
+under the configuration key `cas.ticket.registry`. Signing & encryption settings for this registry are 
+available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.ticket.registry.redis`.
 
 ## Protocol Ticket Security
 
 Controls whether tickets issued by the CAS server should be secured via signing and encryption
-when shared with client applications on outgoing calls. The signing and encryption keys [are both JWKs](Configuration-Properties-Common.html#signing--encryption) of size `512` and `256`.
-The encryption algorithm is set to `AES_128_CBC_HMAC_SHA_256`. Signing & encryption settings for this feature are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.ticket`.
+when shared with client applications on outgoing calls. The signing and encryption 
+keys [are both JWKs](Configuration-Properties-Common.html#signing--encryption) of size `512` and `256`.
+The encryption algorithm is set to `AES_128_CBC_HMAC_SHA_256`. Signing & encryption settings for this 
+feature are available [here](Configuration-Properties-Common.html#signing--encryption) under the configuration key `cas.ticket`.
 
 ## Service Tickets Behavior
 
@@ -3505,7 +3569,10 @@ Ticket expiration policies are activated in the following conditions:
 - Disabling a policy requires that all its timeout settings be set to a value equal or less than zero.
 - If not ticket expiration policy is determined, CAS shall ensure the ticket are *always* considered expired.
 
-<div class="alert alert-info"><strong>Keep What You Need!</strong><p>You are encouraged to only keep and maintain properties and settings needed for a particular policy. It is <strong>UNNECESSARY</strong> to grab a copy of all fields or keeping a copy as a reference while leaving them commented out. This strategy would ultimately lead to poor upgrades increasing chances of breaking changes and a messy deployment at that.</p></div>
+<div class="alert alert-info"><strong>Keep What You Need!</strong><p>You are encouraged to only keep and maintain 
+properties and settings needed for a particular policy. It is <strong>UNNECESSARY</strong> to grab a copy of all 
+fields or keeping a copy as a reference while leaving them commented out. This strategy would ultimately lead to 
+poor upgrades increasing chances of breaking changes and a messy deployment at that.</p></div>
 
 Ticket expiration policies are activated in the following order:
 
@@ -3738,45 +3805,147 @@ To learn more about this topic, [please review this guide](../protocol/REST-Prot
 
 To learn more about this topic, [please review this guide](Monitoring-Statistics.html).
 
-```properties
-# cas.metrics.loggerName=perfStatsLogger
-# cas.metrics.refreshInterval=30
-```
+### Atlas
 
-### Metrics Storage
-
-#### Redis
+By default, metrics are exported to Atlas running on your local machine. The location of the Atlas server to use can be provided using:
 
 ```properties
-# cas.metrics.redis.key=
-# cas.metrics.redis.prefix=
+# management.metrics.export.atlas.uri=http://atlas.example.com:7101/api/v1/publish
 ```
 
-Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#redis-configuration) under the configuration key `cas.metrics`.
+### Datadog
 
-#### Statsd
+Datadog registry pushes metrics to `datadoghq` periodically. To export metrics to Datadog, your API key must be provided:
 
 ```properties
-# cas.metrics.statsd.host=
-# cas.metrics.statsd.port=8125
-# cas.metrics.statsd.prefix=cas
+# management.metrics.export.datadog.api-key=YOUR_KEY
 ```
 
-#### MongoDb
-
- Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#mongodb-configuration) under the configuration key `cas.metrics.mongo`.
-
-#### Open TSDB
+You can also change the interval at which metrics are sent to Datadog:
 
 ```properties
-# cas.metrics.openTsdb.connectTimeout=10000
-# cas.metrics.openTsdb.readTimeout=30000
-# cas.metrics.openTsdb.prefix=url
+# management.metrics.export.datadog.step=30s
 ```
 
-#### InfluxDb
+### Ganglia
 
-Common configuration settings for this feature are available [here](Configuration-Properties-Common.html#influxdb-configuration) under the configuration key `cas.metrics.influxDb`.
+By default, metrics are exported to Ganglia running on your local machine. The Ganglia server host and port to use can be provided using:
+
+```properties
+# management.metrics.export.ganglia.host=ganglia.example.com
+# management.metrics.export.ganglia.port=9649
+```
+
+### Graphite
+
+By default, metrics are exported to Graphite running on your local machine. The Graphite server host and port to use can be provided using:
+
+```properties
+# management.metrics.export.graphite.host=graphite.example.com
+# management.metrics.export.graphite.port=9004
+```
+
+### InfluxDb
+
+By default, metrics are exported to Influx running on your local machine. The location of the Influx server to use can be provided using:
+
+```properties
+# management.metrics.export.influx.uri=http://influx.example.com:8086
+```
+### JMX
+
+Micrometer provides a hierarchical mapping to JMX, primarily as a cheap and portable way to view metrics locally.
+
+### New Relic
+
+New Relic registry pushes metrics to New Relic periodically. To export metrics to New Relic, your API key and account id must be provided:
+
+```properties
+# management.metrics.export.newrelic.api-key=YOUR_KEY
+# management.metrics.export.newrelic.account-id=YOUR_ACCOUNT_ID
+```
+ 
+You can also change the interval at which metrics are sent to New Relic:
+
+```properties
+# management.metrics.export.newrelic.step=30s
+```
+
+### Prometheus
+
+Prometheus expects to scrape or poll individual app instances for metrics. Spring Boot provides an actuator endpoint 
+available at `/actuator/prometheus` to present a Prometheus scrape with the appropriate format.
+
+Here is an example `scrape_config` to add to `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: 'spring'
+	metrics_path: '/actuator/prometheus'
+	static_configs:
+	  - targets: ['HOST:PORT']
+``` 
+
+### SignalFx
+
+SignalFx registry pushes metrics to SignalFx periodically. To export metrics to SignalFx, your access token must be provided:
+
+```properties
+# management.metrics.export.signalfx.access-token=YOUR_ACCESS_TOKEN
+```
+
+You can also change the interval at which metrics are sent to SignalFx:
+
+```properties
+# management.metrics.export.signalfx.step=30s
+```
+
+Micrometer ships with a simple, in-memory backend that is automatically used as a fallback if no other registry is configured. 
+This allows you to see what metrics are collected in the metrics endpoint.
+
+The in-memory backend disables itself as soon as you’re using any of the other available backend. You can also disable it explicitly:
+
+```properties
+# management.metrics.export.simple.enabled=false
+```
+
+### StatsD
+
+The StatsD registry pushes metrics over UDP to a StatsD agent eagerly. By default, 
+metrics are exported to a StatsD agent running on your local machine. The StatsD agent host and port to use can be provided using:
+
+```properties
+# management.metrics.export.statsd.host=statsd.example.com
+# management.metrics.export.statsd.port=9125
+```
+
+You can also change the StatsD line protocol to use (default to Datadog):
+
+```properties
+# management.metrics.export.statsd.flavor=etsy
+```
+
+### Wavefront
+
+Wavefront registry pushes metrics to Wavefront periodically. If you are exporting metrics to 
+Wavefront directly, your API token must be provided:
+
+```properties
+# management.metrics.export.wavefront.api-token=YOUR_API_TOKEN
+```
+
+Alternatively, you may use a Wavefront sidecar or an internal proxy set up in your environment that 
+forwards metrics data to the Wavefront API host:
+
+```properties
+# management.metrics.export.uri=proxy://localhost:2878
+```
+
+You can also change the interval at which metrics are sent to Wavefront:
+
+```properties
+# management.metrics.export.wavefront.step=30s
+```
 
 ## SAML Metadata UI
 

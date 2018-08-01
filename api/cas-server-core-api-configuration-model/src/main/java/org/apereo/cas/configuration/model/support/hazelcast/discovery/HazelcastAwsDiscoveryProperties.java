@@ -2,9 +2,11 @@ package org.apereo.cas.configuration.model.support.hazelcast.discovery;
 
 import org.apereo.cas.configuration.support.RequiredProperty;
 import org.apereo.cas.configuration.support.RequiresModule;
-import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * This is {@link HazelcastAwsDiscoveryProperties}.
@@ -13,7 +15,6 @@ import lombok.Setter;
  * @since 5.3.0
  */
 @RequiresModule(name = "cas-server-support-hazelcast-core")
-
 @Getter
 @Setter
 public class HazelcastAwsDiscoveryProperties implements Serializable {

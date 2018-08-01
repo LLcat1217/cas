@@ -1,7 +1,5 @@
 package org.apereo.cas.authentication;
 
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.authentication.handler.support.SimpleTestUsernamePasswordAuthenticationHandler;
 import org.apereo.cas.authentication.principal.DefaultPrincipalFactory;
 import org.apereo.cas.authentication.principal.Principal;
@@ -11,6 +9,9 @@ import org.apereo.cas.authentication.principal.WebApplicationService;
 import org.apereo.cas.services.RegisteredService;
 import org.apereo.cas.services.RegisteredServiceAccessStrategy;
 import org.apereo.cas.util.CollectionUtils;
+
+import lombok.experimental.UtilityClass;
+import lombok.val;
 import org.apereo.services.persondir.support.StubPersonAttributeDao;
 
 import java.net.MalformedURLException;
@@ -28,7 +29,6 @@ import static org.mockito.Mockito.*;
  * @author Scott Battaglia
  * @since 3.0.0.2
  */
-@Slf4j
 @UtilityClass
 public class CoreAuthenticationTestUtils {
 
@@ -55,7 +55,7 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static UsernamePasswordCredential getCredentialsWithDifferentUsernameAndPassword(final String username, final String password) {
-        final UsernamePasswordCredential usernamePasswordCredentials = new UsernamePasswordCredential();
+        val usernamePasswordCredentials = new UsernamePasswordCredential();
         usernamePasswordCredentials.setUsername(username);
         usernamePasswordCredentials.setPassword(password);
 
@@ -75,7 +75,7 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static Service getService(final String id) {
-        final Service svc = mock(Service.class);
+        val svc = mock(Service.class);
         when(svc.getId()).thenReturn(id);
         when(svc.matches(any(Service.class))).thenReturn(true);
         return svc;
@@ -90,7 +90,7 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static WebApplicationService getWebApplicationService(final String id) {
-        final WebApplicationService svc = mock(WebApplicationService.class);
+        val svc = mock(WebApplicationService.class);
         when(svc.getId()).thenReturn(id);
         when(svc.matches(any(WebApplicationService.class))).thenReturn(true);
         when(svc.getOriginalUrl()).thenReturn(id);
@@ -98,7 +98,7 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static StubPersonAttributeDao getAttributeRepository() {
-        final Map<String, List<Object>> attributes = new HashMap<>();
+        val attributes = new HashMap<String, List<Object>>();
         attributes.put("uid", CollectionUtils.wrap(CONST_USERNAME));
         attributes.put("cn", CollectionUtils.wrap(CONST_USERNAME.toUpperCase()));
         attributes.put("givenName", CollectionUtils.wrap(CONST_USERNAME));
@@ -119,8 +119,8 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static Principal getPrincipal(final String name) {
-        final Map backingMap = getAttributeRepository().getBackingMap();
-        return getPrincipal(name, backingMap);
+        val backingMap = getAttributeRepository().getBackingMap();
+        return getPrincipal(name, (Map) backingMap);
     }
 
     public static Principal getPrincipal(final String name, final Map<String, Object> attributes) {
@@ -148,8 +148,8 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static Authentication getAuthentication(final Principal principal, final Map<String, Object> attributes, final ZonedDateTime authnDate) {
-        final AuthenticationHandler handler = new SimpleTestUsernamePasswordAuthenticationHandler();
-        final CredentialMetaData meta = new BasicCredentialMetaData(new UsernamePasswordCredential());
+        val handler = new SimpleTestUsernamePasswordAuthenticationHandler();
+        val meta = new BasicCredentialMetaData(new UsernamePasswordCredential());
         return new DefaultAuthenticationBuilder(principal)
             .addCredential(meta)
             .setAuthenticationDate(authnDate)
@@ -163,13 +163,13 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static RegisteredService getRegisteredService(final String url) {
-        final RegisteredService service = mock(RegisteredService.class);
+        val service = mock(RegisteredService.class);
         when(service.getServiceId()).thenReturn(url);
         when(service.getName()).thenReturn("service name");
         when(service.getId()).thenReturn(Long.MAX_VALUE);
         when(service.getDescription()).thenReturn("service description");
 
-        final RegisteredServiceAccessStrategy access = mock(RegisteredServiceAccessStrategy.class);
+        val access = mock(RegisteredServiceAccessStrategy.class);
         when(access.isServiceAccessAllowed()).thenReturn(true);
         when(service.getAccessStrategy()).thenReturn(access);
         return service;
@@ -205,8 +205,8 @@ public class CoreAuthenticationTestUtils {
     }
 
     public static AuthenticationBuilder getAuthenticationBuilder(final Principal principal) {
-        final CredentialMetaData meta = new BasicCredentialMetaData(new UsernamePasswordCredential());
-        final AuthenticationHandler handler = new SimpleTestUsernamePasswordAuthenticationHandler();
+        val meta = new BasicCredentialMetaData(new UsernamePasswordCredential());
+        val handler = new SimpleTestUsernamePasswordAuthenticationHandler();
         return new DefaultAuthenticationBuilder(principal)
             .addCredential(meta)
             .addSuccess("test", new DefaultAuthenticationHandlerExecutionResult(handler, meta));

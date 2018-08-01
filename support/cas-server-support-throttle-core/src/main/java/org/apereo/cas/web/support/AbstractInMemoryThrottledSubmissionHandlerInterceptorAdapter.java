@@ -1,14 +1,13 @@
 package org.apereo.cas.web.support;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apereo.cas.audit.AuditTrailExecutionPlan;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -37,9 +36,20 @@ public abstract class AbstractInMemoryThrottledSubmissionHandlerInterceptorAdapt
             authenticationFailureCode, auditTrailExecutionPlan, applicationCode);
     }
 
+    /**
+     * Computes the instantaneous rate in between two given dates corresponding to two submissions.
+     *
+     * @param a First date.
+     * @param b Second date.
+     * @return Instantaneous submission rate in submissions/sec, e.g. {@code a - b}.
+     */
+    private static double submissionRate(final ZonedDateTime a, final ZonedDateTime b) {
+        return SUBMISSION_RATE_DIVIDEND / (a.toInstant().toEpochMilli() - b.toInstant().toEpochMilli());
+    }
+
     @Override
     public boolean exceedsThreshold(final HttpServletRequest request) {
-        final ZonedDateTime last = this.ipMap.get(constructKey(request));
+        val last = this.ipMap.get(constructKey(request));
         return last != null && submissionRate(ZonedDateTime.now(ZoneOffset.UTC), last) > getThresholdRate();
     }
 
@@ -55,29 +65,8 @@ public abstract class AbstractInMemoryThrottledSubmissionHandlerInterceptorAdapt
     @Override
     public void decrement() {
         LOGGER.info("Beginning audit cleanup...");
-
-        final Set<Entry<String, ZonedDateTime>> keys = this.ipMap.entrySet();
-        LOGGER.debug("Decrementing counts for throttler.  Starting key count: [{}]", keys.size());
-
-        final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        for (final Iterator<Entry<String, ZonedDateTime>> iter = keys.iterator(); iter.hasNext();) {
-            final Entry<String, ZonedDateTime> entry = iter.next();
-            if (submissionRate(now, entry.getValue()) < getThresholdRate()) {
-                LOGGER.trace("Removing entry for key [{}]", entry.getKey());
-                iter.remove();
-            }
-        }
+        val now = ZonedDateTime.now(ZoneOffset.UTC);
+        this.ipMap.entrySet().removeIf(entry -> submissionRate(now, entry.getValue()) < getThresholdRate());
         LOGGER.debug("Done decrementing count for throttler.");
-    }
-
-    /**
-     * Computes the instantaneous rate in between two given dates corresponding to two submissions.
-     *
-     * @param a First date.
-     * @param b Second date.
-     * @return Instantaneous submission rate in submissions/sec, e.g. {@code a - b}.
-     */
-    private static double submissionRate(final ZonedDateTime a, final ZonedDateTime b) {
-        return SUBMISSION_RATE_DIVIDEND / (a.toInstant().toEpochMilli() - b.toInstant().toEpochMilli());
     }
 }
